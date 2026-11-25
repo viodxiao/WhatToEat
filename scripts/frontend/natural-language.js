@@ -1,11 +1,21 @@
-import { element, renderRecipeList } from './app.js';
-
 const form = document.querySelector('#nl-form');
 const output = document.querySelector('#nl-output');
 
-// 结果直接复用主列表那套卡片渲染：菜单、详情、缺料提示都不再各写一份
-let last = null;
+// 共享渲染器用动态导入：即使 app.js 加载失败，submit 处理器也已经挂上，
+// preventDefault 一定生效，不会退化成浏览器默认提交导致整页刷新。
+let shared = null;
 const limits = {ready: 6, related: 6};
+let last = null;
+
+async function renderer() {
+  if (shared) return shared;
+  try {
+    shared = await import('./app.js');
+    return shared;
+  } catch {
+    throw new Error('界面组件加载失败（可能是浏览器缓存了旧脚本），请按 Ctrl+F5 强制刷新后重试');
+  }
+}
 
 function status(state, text) {
   output.dataset.state = state;
@@ -20,7 +30,8 @@ async function post(url, body) {
   return data;
 }
 
-function draw() {
+async function draw(ui) {
+  const {element, renderRecipeList} = ui;
   const {parsed, result} = last;
   output.dataset.state = 'done';
   output.replaceChildren();
@@ -30,9 +41,9 @@ function draw() {
     if (!items.length) continue;
     const group = element('section', `result-group ${key}`);
     group.append(element('h3', '', `${label} · ${items.length}`));
-    renderRecipeList(group, items, limits[key], () => {
+    renderRecipeList(group, items, limits[key], async () => {
       limits[key] += 12;
-      draw();
+      await draw(await renderer());
     });
     output.append(group);
   }
@@ -45,12 +56,13 @@ function draw() {
   output.append(details);
 }
 
-form.addEventListener('submit', async event => {
+form?.addEventListener('submit', async event => {
   event.preventDefault();
   const button = form.querySelector('button');
   button.disabled = true;
   status('busy', '正在理解需求…');
   try {
+    const ui = await renderer();
     const parsed = await post('/api/parse', {text: form.elements.text.value, use_ontology: form.elements.ontology.checked});
     if (parsed.status !== 'ready') {
       status('notice', '需要补充或调整需求：' + parsed.reasons.join('；'));
@@ -60,7 +72,7 @@ form.addEventListener('submit', async event => {
     limits.ready = 6;
     limits.related = 6;
     last = {parsed, result};
-    draw();
+    await draw(ui);
   } catch (error) { status('error', error.message); }
   finally { button.disabled = false; }
 });

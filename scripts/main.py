@@ -67,6 +67,21 @@ app = FastAPI(title="今天吃什么？", lifespan=lifespan)
 app.mount("/assets", StaticFiles(directory=FRONTEND), name="assets")
 
 
+@app.middleware("http")
+async def revalidate_frontend(request: Request, call_next):
+    """前端资源强制回源校验。
+
+    StaticFiles 只给 etag/last-modified，不给 Cache-Control，浏览器会按启发式规则
+    直接用缓存。改动 JS 后旧文件仍被复用，模块导入不匹配就会静默失效，
+    表现为「点搜索页面直接刷新」。no-cache 表示缓存但每次校验，未改动时仍是 304。
+    """
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.startswith("/assets/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/", include_in_schema=False)
 def index():
     return FileResponse(FRONTEND / "index.html")
