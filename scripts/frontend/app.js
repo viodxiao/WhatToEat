@@ -674,3 +674,6 @@ async function initialize() {
 }
 
 initialize();
+
+// 供自然语言面板复用同一套卡片渲染，避免两处各写一份列表样式
+export { element, renderRecipeList };

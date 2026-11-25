@@ -138,12 +138,13 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .nl-output[data-state="busy"] { color: var(--green); }
 .nl-output[data-state="notice"] { color: #805239; }
 .nl-output[data-state="error"] { color: var(--red); }
-.nl-group-title { margin-top: 3px; font-size: 12px; font-weight: 650; color: var(--green); }
-.nl-item { position: relative; padding-left: 12px; }
-.nl-item::before { content: ""; position: absolute; left: 1px; top: .62em; width: 4px; height: 4px; border-radius: 50%; background: #a9c3b3; }
 .nl-output details { margin-top: 2px; font-size: 12px; }
 .nl-output summary { cursor: pointer; color: var(--green); }
 .nl-output pre { margin: 7px 0 0; padding: 9px 11px; max-height: 190px; overflow: auto; border: 1px solid #e8eee8; border-radius: 9px; background: #f6f8f6; font-size: 11px; line-height: 1.55; color: #3d4f45; }
+/* 自然语言结果复用主列表卡片，这里只补回被 .nl-output 继承覆盖的颜色与间距 */
+.nl-output .result-group { margin-top: 5px; }
+.nl-output .recipe-card { color: var(--text); }
+.nl-output .nl-conditions { margin-top: 3px; }
 .selected-line { margin: 0 23px; padding: 9px 11px; background: #f5f8f5; border: 1px dashed #dfe8df; border-radius: 11px; min-height: 43px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .selected-line p { font-size: 12px; color: var(--muted); }
 .selected-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 3px 2px 9px; border: 1px solid #cfe3d7; border-radius: 7px; background: var(--green-tint); color: var(--green); }

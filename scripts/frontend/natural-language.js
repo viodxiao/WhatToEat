@@ -1,5 +1,11 @@
+import { element, renderRecipeList } from './app.js';
+
 const form = document.querySelector('#nl-form');
 const output = document.querySelector('#nl-output');
+
+// 结果直接复用主列表那套卡片渲染：菜单、详情、缺料提示都不再各写一份
+let last = null;
+const limits = {ready: 6, related: 6};
 
 function status(state, text) {
   output.dataset.state = state;
@@ -14,6 +20,31 @@ async function post(url, body) {
   return data;
 }
 
+function draw() {
+  const {parsed, result} = last;
+  output.dataset.state = 'done';
+  output.replaceChildren();
+  output.append(element('p', 'nl-hint', parsed.assumptions.join('；')));
+  for (const [key, label] of [['ready', '符合条件的候选'], ['related', '仍缺食材的候选']]) {
+    const items = result[key];
+    if (!items.length) continue;
+    const group = element('section', `result-group ${key}`);
+    group.append(element('h3', '', `${label} · ${items.length}`));
+    renderRecipeList(group, items, limits[key], () => {
+      limits[key] += 12;
+      draw();
+    });
+    output.append(group);
+  }
+  if (!result.ready.length && !result.related.length) {
+    output.append(element('p', 'results-empty', '没有符合当前条件的菜谱。'));
+  }
+  const details = element('details', 'nl-conditions');
+  details.append(element('summary', '', '查看搜索条件'),
+                 element('pre', '', JSON.stringify(parsed.search_payload, null, 2)));
+  output.append(details);
+}
+
 form.addEventListener('submit', async event => {
   event.preventDefault();
   const button = form.querySelector('button');
@@ -26,27 +57,10 @@ form.addEventListener('submit', async event => {
       return;
     }
     const result = await post('/api/search', parsed.search_payload);
-    status('done', '');
-    const hint = document.createElement('p');
-    hint.className = 'nl-hint';
-    hint.textContent = parsed.assumptions.join('；');
-    output.append(hint);
-    for (const [label, items] of [['符合条件的候选', result.ready], ['仍缺食材的候选', result.related]]) {
-      const title = document.createElement('p');
-      title.className = 'nl-group-title';
-      title.textContent = `${label}：${items.length} 道（最多展示 10 道）`;
-      output.append(title);
-      for (const item of items.slice(0, 10)) {
-        const row = document.createElement('p');
-        row.className = 'nl-item';
-        row.textContent = item.name + (item.missing.length ? `，还缺：${item.missing.join('、')}` : '');
-        output.append(row);
-      }
-    }
-    const details = document.createElement('details');
-    const summary = document.createElement('summary'); summary.textContent = '查看搜索条件';
-    const pre = document.createElement('pre'); pre.textContent = JSON.stringify(parsed.search_payload, null, 2);
-    details.append(summary, pre); output.append(details);
+    limits.ready = 6;
+    limits.related = 6;
+    last = {parsed, result};
+    draw();
   } catch (error) { status('error', error.message); }
   finally { button.disabled = false; }
 });
