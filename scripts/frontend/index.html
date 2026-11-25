@@ -54,15 +54,20 @@
 
     <div class="workspace">
       <div class="main-column">
-        <section class="panel" style="padding:24px" aria-labelledby="nl-title">
-          <h2 id="nl-title">描述你想做的菜</h2>
-          <form id="nl-form">
-            <label for="nl-text">已有食材、缺少的佐料或厨具，以及难度要求</label>
-            <textarea id="nl-text" name="text" required maxlength="2000" rows="3" style="width:100%" placeholder="我有番茄和鸡蛋，没有生抽，想做简单一点的"></textarea>
-            <label><input type="checkbox" name="ontology" checked> 使用菜谱本体辅助理解</label>
-            <button type="submit">搜索菜谱</button>
+        <section class="panel" aria-labelledby="nl-title">
+          <header class="panel-head">
+            <div class="panel-heading"><span class="panel-icon"><svg class="icon"><use href="#i-spark"/></svg></span><h2 id="nl-title">描述你想做的菜</h2></div>
+            <span class="secondary nl-head-hint">一句话说明食材和条件</span>
+          </header>
+          <form class="nl-body" id="nl-form">
+            <label class="nl-label" for="nl-text">已有食材、缺少的佐料或厨具，以及难度要求</label>
+            <textarea class="nl-input" id="nl-text" name="text" required maxlength="2000" rows="3" placeholder="我有番茄和鸡蛋，没有生抽，想做简单一点的"></textarea>
+            <div class="nl-actions">
+              <label class="nl-toggle"><input type="checkbox" name="ontology" checked> 使用菜谱本体辅助理解</label>
+              <button class="solid-button nl-submit" type="submit">搜索菜谱</button>
+            </div>
+            <div class="nl-output" id="nl-output" role="status" aria-live="polite"></div>
           </form>
-          <div id="nl-output" role="status" aria-live="polite"></div>
         </section>
         <section class="panel pantry" aria-labelledby="pantry-title">
           <header class="panel-head">

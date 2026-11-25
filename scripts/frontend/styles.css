@@ -118,6 +118,32 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .secondary, .subtle { color: var(--muted); font-size: 12px; }
 .subtle { border: 0; background: transparent; padding: 6px; border-radius: 6px; }
 .subtle:hover { background: #edf3ee; color: var(--green); }
+/* 自然语言输入：沿用面板标题、23px 内边距与统一的控件样式 */
+.nl-body { display: grid; gap: 9px; padding: 0 23px 19px; }
+.nl-label { font-size: 12px; color: var(--muted); }
+.nl-input {
+  width: 100%; min-height: 84px; resize: vertical; font: inherit;
+  padding: 11px 13px; border: 1px solid #e1e8e1; border-radius: 11px;
+  background: #f6f8f6; color: var(--text); font-size: 13px; line-height: 1.65;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.nl-input::placeholder { color: #93a49b; }
+.nl-input:focus { outline: none; border-color: #a8c3b2; background: #fff; box-shadow: 0 0 0 3px #24594212; }
+.nl-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.nl-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+.nl-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--green); }
+.nl-submit { min-height: 38px; padding: 9px 18px; font-size: 13px; box-shadow: 0 3px 9px #2459421f; }
+.nl-output { display: grid; gap: 5px; font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+.nl-output:empty { display: none; }
+.nl-output[data-state="busy"] { color: var(--green); }
+.nl-output[data-state="notice"] { color: #805239; }
+.nl-output[data-state="error"] { color: var(--red); }
+.nl-group-title { margin-top: 3px; font-size: 12px; font-weight: 650; color: var(--green); }
+.nl-item { position: relative; padding-left: 12px; }
+.nl-item::before { content: ""; position: absolute; left: 1px; top: .62em; width: 4px; height: 4px; border-radius: 50%; background: #a9c3b3; }
+.nl-output details { margin-top: 2px; font-size: 12px; }
+.nl-output summary { cursor: pointer; color: var(--green); }
+.nl-output pre { margin: 7px 0 0; padding: 9px 11px; max-height: 190px; overflow: auto; border: 1px solid #e8eee8; border-radius: 9px; background: #f6f8f6; font-size: 11px; line-height: 1.55; color: #3d4f45; }
 .selected-line { margin: 0 23px; padding: 9px 11px; background: #f5f8f5; border: 1px dashed #dfe8df; border-radius: 11px; min-height: 43px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .selected-line p { font-size: 12px; color: var(--muted); }
 .selected-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 3px 2px 9px; border: 1px solid #cfe3d7; border-radius: 7px; background: var(--green-tint); color: var(--green); }
@@ -221,6 +247,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .workspace { grid-template-columns: minmax(0, 1fr) 270px; gap: 13px; }
   .panel-head { padding-inline: 15px; }
   .selected-line, .filters, .difficulty-row, .category-row, .plan-section { margin-inline: 15px; }
+  .nl-body { padding-inline: 15px; }
   #results { padding-inline: 15px; }
   .recipe-search { margin-inline: 15px; }
 }
@@ -228,6 +255,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .hero { min-height: 285px; }
   .workspace { grid-template-columns: 1fr; margin-top: 15px; }
   .plan { position: static; }
+  .nl-head-hint { display: none; }
 }
 @media (max-width: 420px) {
   .topbar, .layout { width: calc(100% - 22px); }
