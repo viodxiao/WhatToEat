@@ -1,10 +1,16 @@
 # 今天吃什么，是啊吃什么
 
+> 已完成一次代码与实验审查。请先看 [审查与运行说明](REVIEW.md)：新增自然语言页面入口、真实本体上下文、严格参数验证和修正后的评测；下文及 stage3 原报告的数值属于历史版本。Windows 保持原 `cook` / Python 3.13 环境，见 [Windows 启动说明](WINDOWS.md)；`requirements-tested.txt` 仅记录 Linux 验证环境。
+
 本地菜谱选择器。FastAPI 在启动时读取 `recipe` 下的 CSV、Markdown 和单向匹配规则，并为同一页面提供数据接口。前端无需额外构建。
+
+## Windows 快速启动
+
+在 Anaconda Prompt 中进入解压目录，依次运行 `install_windows.bat`、`verify_windows.bat`、`start_windows.bat`。已有 Python 3.13 的 `cook` 环境会复用。详细说明见 [WINDOWS.md](WINDOWS.md)。
 
 ## 本地运行
 
-在 `InternetNewTec` 目录中执行以下命令。已有 `cook` 环境时可跳过创建步骤。
+在仓库根目录（本文件所在目录）执行以下命令。已有 `cook` 环境时可跳过创建步骤。
 
 ```powershell
 conda create -n cook python=3.13 pip -y
@@ -22,3 +28,41 @@ conda run -n cook python -s -m unittest scripts.test_planner -v
 ```
 
 测试覆盖规则文件中的验收示例、食材与难度筛选、工具任选一项、可选项、配料与克数合并。
+
+## 目录结构
+
+| 目录 | 内容 |
+|---|---|
+| `recipe/` | 领域数据：724 行菜谱索引 CSV、723 篇 Markdown（14 个菜品分类 + 51 个配料）、单向匹配规则 |
+| `scripts/` | `recipe_data.py` 抽取、`planner.py` 检索与推荐、`main.py` API、`frontend/` 页面 |
+| `ontology/` | **阶段一产物**：领域本体（12 类 / 8 关系 / 8 约束），Turtle + JSON 双版本 |
+| `stage2/` | **阶段二产物**：质量检查器输出、问题清单（修前 99 条 → 修后 0 条）、对照实验 |
+| `stage3/` | **阶段三产物**：自然语言解析提示词、20 条评测任务、执行记录、对照结果 |
+
+## 课程作业：Agent 与领域本体协同增强
+
+| 阶段 | 入口 | 说明 |
+|---|---|---|
+| 一 · 本体构建 | [`ontology/README.md`](ontology/README.md) | 建模方式、来源依据、规模统计、修改记录 |
+| 二 · 质量检查 | [`stage2/README.md`](stage2/README.md) | 检查设计、修正内容、复查结果、对照实验、典型案例 |
+| 二 · 已知问题 | [`stage2/KNOWN_ISSUES.md`](stage2/KNOWN_ISSUES.md) | 仍存问题、方法边界与待复核项（复查 0 条 ≠ 没有问题） |
+| 三 · 增强 Agent | [`stage3/README.md`](stage3/README.md) | 自然语言 → 结构化参数 → 现有检索；A/D/B/C 四方案消融对照与结果 |
+| 三 · 典型案例 | [`stage3/cases.md`](stage3/cases.md) | 4 个完整案例：成功、失败、边界，含输入/过程/输出/判定依据 |
+
+质量检查可单独运行（只依赖标准库）：
+
+```powershell
+python -m scripts.quality_check check --tag after   # 全量扫描，当前应为 0 条
+python -m scripts.quality_check eval                # 构造错误样例的对照评测
+```
+
+自然语言层（阶段三）需要一个 OpenAI 兼容接口，配置在环境变量里，不写进仓库：
+
+```powershell
+python -m scripts.stage3_eval --check-gold          # 先验证标注可用，不调模型
+$env:WTE_LLM_BASE_URL = "https://your-gateway/v1"
+$env:WTE_LLM_API_KEY  = "sk-..."
+$env:WTE_LLM_MODEL    = "gpt-4o-mini"
+python -m scripts.stage3_eval                       # 20 任务 × 4 方案 = 80 次调用
+python -m scripts.stage3_eval --replay              # 用已录制记录复算
+```
