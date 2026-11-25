@@ -18,15 +18,15 @@
 | 调用失败从成功率分母消失 | 保留计划任务数、成功记录数、错误数；失败计入任务成功率分母；输出返回非零状态 |
 | 缺少调用成本汇总 | 汇总接口报告的 token 与 elapsed_ms；C 复用 B，不重复计算模型成本 |
 
-`requirements-tested.txt` 是本次实际安装与测试的依赖快照；原 `requirements.txt` 保留作为历史环境记录。新增测试依赖 httpx，仅用于 API 集成测试。
+依赖以 `requirements.txt` 为准，测试额外依赖 `httpx` 由 `requirements-dev.txt` 追加，仅用于 API 集成测试。
 
 ## 运行
 
-在本目录执行（Python 3.12 已验证）：
+在本目录执行（Python 3.13 已验证）：
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-tested.txt
+.venv/bin/python -m pip install -r requirements-dev.txt
 # 通过环境变量设置 WTE_LLM_BASE_URL、WTE_LLM_API_KEY、WTE_LLM_MODEL
 .venv/bin/python -m uvicorn scripts.main:app --host 127.0.0.1 --port 8000
 ```
@@ -49,14 +49,14 @@ python3 -m scripts.stage3_eval --tasks path/to/frozen_tasks.json --output-dir st
 
 ## 已验证结果与适用边界
 
-- 单元与 API 集成测试结果见 `validation/tests.txt`；模型由测试替身替代，不是模型效果评测。
+- 单元与 API 集成测试可用 `python -m unittest scripts.test_planner scripts.test_nl_query scripts.test_revision` 复现；模型由测试替身替代，不是模型效果评测。
 - 阶段二规则复查为 0 条，见 `stage2/issues_review.json`；这只表示现有规则没有发现问题，不表示语义正确，也不是本次新做的大模型质量复核。
 - 历史 20 任务 × 4 组记录重评分见 `stage3/runs/historical-rescore/results.json`，逐条分数见同目录 `scored_records.json`。D/B/C 五字段完全匹配率分别为 0.30/0.70/0.70；按已有条件核算的已匹配候选可做率为 0.519/0.818/0.818。A 的可做率是已匹配菜名子集上的比例，不能视为全部生成菜名的成功率。
 - 这些是旧模型回答的重评分，不是新版提示词或新版守卫逻辑的实测提升。旧记录的来源来自用户提供的归档，本次未独立重跑或验证远端模型。
 - 原测试任务及失败分析已参与历史开发，不能将它们重新包装为未见测试集；建议另一位组员冻结新任务并提供人工参考答案。`--tasks` 支持独立文件。
 - 参数 F1 仍是成功解析记录上的诊断指标；模型调用失败率单独报告，不能只用 F1 宣称整体成功。五字段完全匹配不覆盖 mode、半成品、unsupported_dimensions，不能当成完整语义正确率。
 - D/B 共用含别名、单向覆盖规则的检索器，因此准确命名是“无/有本体提示词”，不能称为完全无领域知识与完整本体的净对照。
-- 本次没有可用模型配置，未运行新版本的真实模型实验。stub 仅验证程序运行，不能写进效果结论。`validation/api_cases.json` 的三个案例同样是测试替身驱动的系统行为记录。
+- 本次没有可用模型配置，未运行新版本的真实模型实验。stub 仅验证程序运行，不能写进效果结论；集成测试里的模型输出同样由测试替身驱动，不代表模型效果。
 
 ## 尚未解决、报告中必须明确的内容
 

@@ -23,7 +23,6 @@ WhatToEat/
   ontology/
   stage2/
   stage3/
-  validation/
 ```
 
 保留原项目目录及食谱中文文件名。源码包不包含 Linux `.venv`、缓存、Git 历史或 IDE 的机器专用配置。不要把 Linux 虚拟环境复制到 Windows。
@@ -51,7 +50,7 @@ conda run -n cook python -s -m pip install -r requirements-dev.txt
 conda run -n cook --no-capture-output python -s -X utf8 -m uvicorn scripts.main:app --host 127.0.0.1 --port 8000
 ```
 
-已有 `cook` 时跳过创建命令。`requirements-dev.txt` 引用原 `requirements.txt`，只额外加入测试依赖。`requirements-tested.txt` 是前一次 Linux/Python 3.12 验证的快照，不是本次 Windows 安装入口。
+已有 `cook` 时跳过创建命令。`requirements-dev.txt` 引用原 `requirements.txt`，只额外加入测试依赖。
 
 ## 自然语言功能配置
 

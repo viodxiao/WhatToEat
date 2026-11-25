@@ -1,6 +1,6 @@
 # 今天吃什么，是啊吃什么
 
-> 已完成一次代码与实验审查。请先看 [审查与运行说明](REVIEW.md)：新增自然语言页面入口、真实本体上下文、严格参数验证和修正后的评测；下文及 stage3 原报告的数值属于历史版本。Windows 保持原 `cook` / Python 3.13 环境，见 [Windows 启动说明](WINDOWS.md)；`requirements-tested.txt` 仅记录 Linux 验证环境。
+> 已完成一次代码与实验审查。请先看 [审查与运行说明](REVIEW.md)：新增自然语言页面入口、真实本体上下文、严格参数验证和修正后的评测；下文及 stage3 原报告的数值属于历史版本。Windows 保持原 `cook` / Python 3.13 环境，见 [Windows 启动说明](WINDOWS.md)。
 
 本地菜谱选择器。FastAPI 在启动时读取 `recipe` 下的 CSV、Markdown 和单向匹配规则，并为同一页面提供数据接口。前端无需额外构建。
 
