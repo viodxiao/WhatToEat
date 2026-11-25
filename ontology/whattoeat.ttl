@@ -1,0 +1,315 @@
+@prefix wte: <https://github.com/viodxiao/WhatToEat/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://github.com/viodxiao/WhatToEat/ontology>
+    a owl:Ontology ;
+    rdfs:label "「今天吃什么」菜谱领域本体"@zh ;
+    dcterms:title "WhatToEat Recipe Ontology" ;
+    dcterms:description """菜谱选择与厨房资源匹配领域的轻量本体。
+
+本文件只描述概念层：概念类（12 个）、关系（8 条）、数据属性与约束（C1-C8）。
+723 条具体菜谱、6097 个原料项、60 条上位关系均属实例层，不写在本文件中，
+实例由 scripts/recipe_data.py 从 recipe/ 目录下的 Markdown 与 CSV 抽取得到。
+建模方式与来源依据见同目录 README.md 与 ontology.json。"""@zh ;
+    owl:versionInfo "0.3.0" ;
+    dcterms:created "2026-11-25"^^xsd:date ;
+    dcterms:creator "互联网新技术及服务课程三人小组" ;
+    dcterms:source "recipe/ 目录（HowToCook、CookLikeHOC 及公开视频菜谱）" ;
+    rdfs:seeAlso <https://github.com/viodxiao/WhatToEat> .
+
+
+###############################################################################
+# 一、概念类（12 个）
+###############################################################################
+
+wte:FoodProduct
+    a owl:Class ;
+    rdfs:label "可制作食物"@zh ;
+    skos:definition "可以依据一份菜谱制作出来的食物，包括成品菜品与半成品配料。它是「要求」「分类」「难度」「变体」四类属性的作用对象。"@zh ;
+    dcterms:source "scripts/recipe_data.py:68-81 Recipe 数据类（同一结构同时承载菜品与配料）" .
+
+wte:Dish
+    a owl:Class ;
+    rdfs:label "菜品"@zh ;
+    skos:definition "供直接食用的一份成品菜。对应 recipe/ 下除「配料」外的 14 个分类，共 672 条。"@zh ;
+    rdfs:subClassOf wte:FoodProduct ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:unionOf (
+            [ a owl:Restriction ;
+              owl:onProperty wte:requires ;
+              owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+              owl:onClass wte:RecipeRequirement ]
+            [ a owl:Restriction ;
+              owl:onProperty wte:hasVariant ;
+              owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+              owl:onClass wte:MethodVariant ]
+        )
+    ] ;
+    owl:disjointWith wte:Preparation, wte:PantryItem ;
+    dcterms:source "scripts/recipe_data.py:69-81；recipe/食谱名称大全.csv 第 3 列「种类」" ;
+    rdfs:comment "C1：一道菜品至少要有一条 requires，或至少有一个 hasVariant（要求下沉到变体）。" .
+
+wte:Preparation
+    a owl:Class ;
+    rdfs:label "配料（半成品）"@zh ;
+    skos:definition "先于主菜制作、可被其他菜谱作为原料引用的半成品，对应 recipe/配料/ 下 51 个 Markdown。它既是被制作出来的食物，也是下一道菜可选的食材，因此同时归入可制作食物与食材两类。"@zh ;
+    rdfs:subClassOf wte:FoodProduct, wte:Ingredient ;
+    dcterms:source "scripts/recipe_data.py:90-95 material_text()（解析 [..](配料/x.md) 链接）、:118-120 kind_of()（配料按 ingredient 处理）" ;
+    rdfs:comment "C8：多重归类是有意为之。正因配料同时属于 FoodProduct 与 PantryItem，二者不可声明为互斥。" .
+
+wte:PantryItem
+    a owl:Class ;
+    rdfs:label "厨房资源"@zh ;
+    skos:definition "用户在「我的厨房」里可以选择的一项资源，是食材、佐料、厨具的公共上位类，也是上位覆盖关系的作用域。"@zh ;
+    dcterms:source "scripts/recipe_data.py:9 KINDS = (ingredient, seasoning, tool)" .
+
+wte:Ingredient
+    a owl:Class ;
+    rdfs:label "食材"@zh ;
+    skos:definition "构成菜品的可食用原料，包括主料与可作为原料的半成品配料。"@zh ;
+    rdfs:subClassOf wte:PantryItem ;
+    dcterms:source "scripts/recipe_data.py:118-125 kind_of() 的默认分支" .
+
+wte:Seasoning
+    a owl:Class ;
+    rdfs:label "佐料"@zh ;
+    skos:definition "调味用的原料。判定依据为固定词表与「油/酱/盐/汁/醋」等词尾，见代码。"@zh ;
+    rdfs:subClassOf wte:PantryItem ;
+    dcterms:source "scripts/recipe_data.py:33-42 SEASONINGS 词表；:123 词尾规则" .
+
+wte:Tool
+    a owl:Class ;
+    rdfs:label "厨具"@zh ;
+    skos:definition "完成菜品所需的厨房设备或器具。厨具不参与上位覆盖扩展，按是否已有设备逐项判断。"@zh ;
+    rdfs:subClassOf wte:PantryItem ;
+    dcterms:source "scripts/recipe_data.py:43-49 TOOL 正则；:121 厨具段落标记" .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( wte:Ingredient wte:Seasoning wte:Tool ) .
+
+wte:RecipeRequirement
+    a owl:Class ;
+    rdfs:label "原料要求"@zh ;
+    skos:definition "菜谱对一项厨房资源提出的要求，是「菜谱—原料」关系的具体化。一个要求下可挂多个要求项，表示「任选其一」；isOptional 区分必需与可选。"@zh ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty wte:hasOption ;
+        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:onClass wte:RequirementOption
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty wte:isOptional ;
+        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:onDataRange xsd:boolean
+    ] ;
+    dcterms:source "scripts/recipe_data.py:62-65 Requirement(options, optional)" ;
+    rdfs:comment "C2/C3/C4：至少一个要求项；isOptional 必须显式给出；同一要求下多要求项为多选一，不是全部必需。" .
+
+wte:RequirementOption
+    a owl:Class ;
+    rdfs:label "要求项"@zh ;
+    skos:definition "满足某项原料要求的一个候选资源。同一要求下的多个要求项互斥可选，命中任一即视为该项通过。"@zh ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty wte:refersTo ;
+        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:onClass wte:PantryItem
+    ] ;
+    dcterms:source "scripts/recipe_data.py:53-60 Material 数据类；:179-187 按「或 / 或者 / ／」切分候选" .
+
+wte:MethodVariant
+    a owl:Class ;
+    rdfs:label "做法变体"@zh ;
+    skos:definition "同一菜谱下互斥的整套做法（例如原味豆浆的「现磨版」与「冲调版」）。每个变体持有独立的原料要求集合，此时菜品级要求为空。"@zh ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty wte:requires ;
+        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:onClass wte:RecipeRequirement
+    ] ;
+    dcterms:source "scripts/recipe_data.py:361-381 variants 分支；recipe/饮品/原味豆浆.md 的「## 现磨版」「## 冲调版」" ;
+    rdfs:comment "C6：变体是阶段一新增的概念。原实现用 if name == '原味豆浆' 硬编码表达，现提升为可复用的类。" .
+
+wte:DishCategory
+    a owl:Class ;
+    rdfs:label "菜品分类"@zh ;
+    skos:definition "按烹饪方式划分的菜谱类别，共 14 个。「配料」不是分类，它是判定 Preparation 的标志。"@zh ;
+    dcterms:source "recipe/ 下的 14 个目录名；CSV 第 3 列" .
+
+wte:DifficultyLevel
+    a owl:Class ;
+    rdfs:label "难度等级"@zh ;
+    skos:definition "菜谱制作难度，取值 1-5，与前端星级一致。"@zh ;
+    dcterms:source "CSV 第 5 列「难度」；scripts/frontend/index.html 星级筛选" .
+
+
+###############################################################################
+# 二、关系（8 条对象属性）
+###############################################################################
+
+wte:requires
+    a owl:ObjectProperty ;
+    rdfs:label "要求"@zh ;
+    skos:definition "菜谱或做法变体对一项原料的要求。方向固定为 食物→要求，不允许反向声明。"@zh ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( wte:FoodProduct wte:MethodVariant ) ] ;
+    rdfs:range wte:RecipeRequirement ;
+    dcterms:source "scripts/recipe_data.py:397-398 build_recipe() 产出 requirements 列表" .
+
+wte:hasOption
+    a owl:ObjectProperty ;
+    rdfs:label "候选"@zh ;
+    skos:definition "一项原料要求下可接受的候选资源，多个候选之间为「或」。"@zh ;
+    rdfs:domain wte:RecipeRequirement ;
+    rdfs:range wte:RequirementOption ;
+    dcterms:source "scripts/recipe_data.py:62-65 Requirement.options" .
+
+wte:refersTo
+    a owl:ObjectProperty ;
+    rdfs:label "指向资源"@zh ;
+    skos:definition "一个要求项所指向的具体厨房资源，决定该项属于食材、佐料还是厨具。"@zh ;
+    rdfs:domain wte:RequirementOption ;
+    rdfs:range wte:PantryItem ;
+    dcterms:source "scripts/recipe_data.py:53-60 Material.name / Material.kind" .
+
+wte:broader
+    a owl:ObjectProperty, owl:TransitiveProperty, owl:AsymmetricProperty, owl:IrreflexiveProperty ;
+    rdfs:label "上位原料"@zh ;
+    skos:definition "「具体原料 → 可被它满足的较宽标签」的单向覆盖关系。选中具体项可以满足上位要求，反之不成立；可跨多级传递，如 茉莉绿茶 → 绿茶 → 茶叶。"@zh ;
+    rdfs:domain wte:PantryItem ;
+    rdfs:range wte:PantryItem ;
+    dcterms:source "recipe/原料标签单向匹配规则.txt 的 [单向规则] 61 条；scripts/recipe_data.py:401-423 read_rules() / expand()" ;
+    rdfs:comment "C5：声明 Transitive + Asymmetric + Irreflexive，即以 OWL 公理形式表达「单向不可逆」。同义归一（西红柿→番茄）不属于本关系，见 skos:altLabel。" .
+
+wte:usesPreparation
+    a owl:ObjectProperty ;
+    rdfs:label "使用配料"@zh ;
+    skos:definition "菜品把某个半成品配料作为组成部件引用。配料自身的原料构成由该配料的 requires 描述，二者串起来即为「菜品—配料—原料」的组成链。"@zh ;
+    rdfs:domain wte:Dish ;
+    rdfs:range wte:Preparation ;
+    dcterms:source "scripts/recipe_data.py:90-95 material_text()；:171-177 requirement_parts() 优先按配料名匹配" .
+
+wte:hasVariant
+    a owl:ObjectProperty ;
+    rdfs:label "有做法"@zh ;
+    skos:definition "菜谱包含的互斥做法分支。存在变体时，原料要求挂在变体上而非菜品上。"@zh ;
+    rdfs:domain wte:FoodProduct ;
+    rdfs:range wte:MethodVariant ;
+    dcterms:source "scripts/recipe_data.py:361-381" .
+
+wte:belongsToCategory
+    a owl:ObjectProperty ;
+    rdfs:label "属于分类"@zh ;
+    skos:definition "菜品所属的烹饪方式分类，一道菜恰好属于一个分类。"@zh ;
+    rdfs:domain wte:Dish ;
+    rdfs:range wte:DishCategory ;
+    dcterms:source "scripts/recipe_data.py:397 Recipe.category" .
+
+wte:hasDifficulty
+    a owl:ObjectProperty ;
+    rdfs:label "难度为"@zh ;
+    skos:definition "食物对应的难度等级，取值 1-5，用于筛选与推荐。"@zh ;
+    rdfs:domain wte:FoodProduct ;
+    rdfs:range wte:DifficultyLevel ;
+    dcterms:source "scripts/recipe_data.py:397 Recipe.difficulty" .
+
+
+###############################################################################
+# 三、数据属性（8 条）
+###############################################################################
+
+wte:name a owl:DatatypeProperty ;
+    rdfs:label "名称"@zh ;
+    rdfs:range xsd:string ;
+    skos:definition "食物或厨房资源的规范名称。抽取时已按同义词表归一（如 西红柿→番茄）。"@zh ;
+    dcterms:source "scripts/recipe_data.py:98-99 canonical()；:21-32 ALIASES（39 条，建模为 skos:altLabel）" .
+
+wte:grams a owl:DatatypeProperty ;
+    rdfs:label "克数"@zh ;
+    rdfs:range xsd:decimal ;
+    skos:definition "原文给出明确克数时填写的重量。原文写「适量/少许」或只给体积、个数时留空。"@zh ;
+    dcterms:source "scripts/recipe_data.py:161-166 grams_for()" ;
+    rdfs:comment "C7：留空表示信息不足，不得推断为 0，也不得据空值断言「不需要该原料」。" .
+
+wte:quantityText a owl:DatatypeProperty ;
+    rdfs:label "原始用量文本"@zh ;
+    rdfs:range xsd:string ;
+    skos:definition "原文中的用量表述，如「1.5 个」「0-2g」「适量」，保留原样以便回溯。"@zh ;
+    dcterms:source "scripts/recipe_data.py:256-271 add_amount()" .
+
+wte:isApproximate a owl:DatatypeProperty ;
+    rdfs:label "用量为约数"@zh ;
+    rdfs:range xsd:boolean ;
+    skos:definition "用量文本含「约/左右」时置真，提示下游不要把该克数当精确值。"@zh ;
+    dcterms:source "scripts/recipe_data.py:265-268" .
+
+wte:isOptional a owl:DatatypeProperty ;
+    rdfs:label "是否可选"@zh ;
+    rdfs:range xsd:boolean ;
+    skos:definition "原料要求是否为可选项。false 为必需，缺料即判为不可做；true 为可选，缺料不影响判定。"@zh ;
+    dcterms:source "scripts/recipe_data.py:62-65 Requirement.optional；:11 OPTIONAL 正则" .
+
+wte:description a owl:DatatypeProperty ;
+    rdfs:label "简介"@zh ;
+    rdfs:range xsd:string ;
+    dcterms:source "scripts/recipe_data.py:356-357" .
+
+wte:energyText a owl:DatatypeProperty ;
+    rdfs:label "热量文本"@zh ;
+    rdfs:range xsd:string ;
+    skos:definition "原文给出的预估热量文本，未统一单位，故保留字符串而非数值。"@zh ;
+    dcterms:source "scripts/recipe_data.py:358-360" .
+
+wte:sourceRef a owl:DatatypeProperty ;
+    rdfs:label "出处"@zh ;
+    rdfs:range xsd:string ;
+    skos:definition "菜谱的来源标识，用于阶段二的证据回溯。"@zh ;
+    dcterms:source "CSV 第 2 列「出处」；scripts/recipe_data.py:397 Recipe.source" .
+
+
+###############################################################################
+# 四、受控词表（分类与难度，属概念层的枚举，不是菜谱实例）
+###############################################################################
+
+wte:cat-炒菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "炒菜"@zh .
+wte:cat-炖菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "炖菜"@zh .
+wte:cat-蒸菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "蒸菜"@zh .
+wte:cat-煮锅 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "煮锅"@zh .
+wte:cat-砂锅菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "砂锅菜"@zh .
+wte:cat-汤 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "汤"@zh .
+wte:cat-凉拌 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "凉拌"@zh .
+wte:cat-卤菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "卤菜"@zh .
+wte:cat-炸品 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "炸品"@zh .
+wte:cat-烤类 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "烤类"@zh .
+wte:cat-烫菜 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "烫菜"@zh .
+wte:cat-早餐 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "早餐"@zh .
+wte:cat-主食 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "主食"@zh .
+wte:cat-饮品 a owl:NamedIndividual, wte:DishCategory ; rdfs:label "饮品"@zh .
+
+wte:level-1 a owl:NamedIndividual, wte:DifficultyLevel ; rdfs:label "1 星"@zh .
+wte:level-2 a owl:NamedIndividual, wte:DifficultyLevel ; rdfs:label "2 星"@zh .
+wte:level-3 a owl:NamedIndividual, wte:DifficultyLevel ; rdfs:label "3 星"@zh .
+wte:level-4 a owl:NamedIndividual, wte:DifficultyLevel ; rdfs:label "4 星"@zh .
+wte:level-5 a owl:NamedIndividual, wte:DifficultyLevel ; rdfs:label "5 星"@zh .
+
+
+###############################################################################
+# 五、约束汇总（C1-C8）
+#   OWL 能表达的已写成公理；无法用 OWL 表达的在 ontology.json 的
+#   constraints 中给出可执行的检查方式，供阶段二使用。
+###############################################################################
+
+# C1 菜品至少有一个 requires 或一个 hasVariant —— 已用 owl:unionOf 表达（见 wte:Dish）
+# C2 每个 RecipeRequirement 至少一个 hasOption —— 已用 minQualifiedCardinality 表达
+# C3 isOptional 必须显式给出 —— 已用 qualifiedCardinality 1 表达
+# C4 同一要求下多个要求项为「多选一」—— 语义约定，OWL 无法区分「与/或」，见 JSON constraints
+# C5 broader 单向、传递、不可逆 —— 已用 Transitive + Asymmetric + Irreflexive 表达
+# C6 有变体时要求下沉到变体 —— 已用 C1 的并集与 MethodVariant 上的 min 1 表达
+# C7 克数缺失表示信息不足 —— 语义约定，见 JSON constraints
+# C8 食材/佐料/厨具互斥；菜品与配料互斥；配料可同时是食材 —— 已用 AllDisjointClasses 与 disjointWith 表达

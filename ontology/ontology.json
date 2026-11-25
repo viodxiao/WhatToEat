@@ -1,0 +1,436 @@
+{
+  "meta": {
+    "id": "https://github.com/viodxiao/WhatToEat/ontology",
+    "label": "「今天吃什么」菜谱领域本体",
+    "version": "0.3.0",
+    "created": "2026-11-25",
+    "format": "JSON 结构化表示（与 whattoeat.ttl 同源同版本，二者必须同步修改）",
+    "scope": "概念层：12 个概念类、8 条关系、8 条数据属性、8 条约束。实例层（723 条菜谱、6120 个原料项、61 条上位关系）由 scripts/recipe_data.py 从 recipe/ 抽取，不写入本文件。",
+    "why_json": "本文件供程序与阶段二检查脚本直接读取；whattoeat.ttl 是 OWL/Turtle 形式化版本，供人工阅读与推理器使用。",
+    "updated": "2026-11-25",
+    "note": "阶段二修正后同步：原料项 6120→6097、要求组 5913→5897、上位规则 61→60、同义词 39→66。变更依据见 stage2/README.md。 阶段三追加 O6（可用性极性缺失）与 O7（口味/菜系无槽位）。"
+  },
+  "classes": [
+    {
+      "id": "FoodProduct",
+      "label": "可制作食物",
+      "parent": null,
+      "definition": "可以依据一份菜谱制作出来的食物，包括成品菜品与半成品配料。是「要求」「分类」「难度」「变体」四类属性的作用对象。",
+      "source": "scripts/recipe_data.py:68-81 Recipe 数据类"
+    },
+    {
+      "id": "Dish",
+      "label": "菜品",
+      "parent": "FoodProduct",
+      "definition": "供直接食用的一份成品菜，对应 recipe/ 下除「配料」外的 14 个分类。",
+      "disjoint_with": [
+        "Preparation",
+        "PantryItem"
+      ],
+      "source": "scripts/recipe_data.py:69-81；recipe/食谱名称大全.csv 第 3 列",
+      "instance_count": 672
+    },
+    {
+      "id": "Preparation",
+      "label": "配料（半成品）",
+      "parent": [
+        "FoodProduct",
+        "Ingredient"
+      ],
+      "definition": "先于主菜制作、可被其他菜谱作为原料引用的半成品。既是被制作出来的食物，也是下一道菜可选的食材，因此同时归入两类（多重归类）。",
+      "source": "scripts/recipe_data.py:90-95 material_text()；:118-120 kind_of()",
+      "instance_count": 51
+    },
+    {
+      "id": "PantryItem",
+      "label": "厨房资源",
+      "parent": null,
+      "definition": "用户在「我的厨房」里可以选择的一项资源，是食材、佐料、厨具的公共上位类，也是上位覆盖关系的作用域。",
+      "source": "scripts/recipe_data.py:9 KINDS"
+    },
+    {
+      "id": "Ingredient",
+      "label": "食材",
+      "parent": "PantryItem",
+      "definition": "构成菜品的可食用原料，包括主料与可作为原料的半成品配料。",
+      "source": "scripts/recipe_data.py:118-125 kind_of() 默认分支"
+    },
+    {
+      "id": "Seasoning",
+      "label": "佐料",
+      "parent": "PantryItem",
+      "definition": "调味用的原料，判定依据为固定词表与「油/酱/盐/汁/醋」等词尾。",
+      "source": "scripts/recipe_data.py:33-42 SEASONINGS；:123 词尾规则"
+    },
+    {
+      "id": "Tool",
+      "label": "厨具",
+      "parent": "PantryItem",
+      "definition": "完成菜品所需的厨房设备或器具。厨具不参与上位覆盖扩展，按是否已有设备逐项判断。",
+      "source": "scripts/recipe_data.py:43-49 TOOL 正则"
+    },
+    {
+      "id": "RecipeRequirement",
+      "label": "原料要求",
+      "parent": null,
+      "definition": "菜谱对一项厨房资源提出的要求，是「菜谱—原料」关系的具体化。一个要求下可挂多个要求项表示「任选其一」，isOptional 区分必需与可选。",
+      "source": "scripts/recipe_data.py:62-65 Requirement"
+    },
+    {
+      "id": "RequirementOption",
+      "label": "要求项",
+      "parent": null,
+      "definition": "满足某项原料要求的一个候选资源。同一要求下的多个要求项互斥可选，命中任一即视为该项通过。",
+      "source": "scripts/recipe_data.py:53-60 Material；:179-187 多选项切分"
+    },
+    {
+      "id": "MethodVariant",
+      "label": "做法变体",
+      "parent": null,
+      "definition": "同一菜谱下互斥的整套做法（如原味豆浆的「现磨版」「冲调版」）。每个变体持有独立的原料要求集合，此时菜品级要求为空。",
+      "source": "scripts/recipe_data.py:361-381；recipe/饮品/原味豆浆.md",
+      "instance_count": 2
+    },
+    {
+      "id": "DishCategory",
+      "label": "菜品分类",
+      "parent": null,
+      "definition": "按烹饪方式划分的菜谱类别，共 14 个。「配料」不是分类，它是判定 Preparation 的标志。",
+      "source": "recipe/ 下 14 个目录名；CSV 第 3 列"
+    },
+    {
+      "id": "DifficultyLevel",
+      "label": "难度等级",
+      "parent": null,
+      "definition": "菜谱制作难度，取值 1-5，与前端星级筛选一致。",
+      "source": "CSV 第 5 列；scripts/frontend/index.html 星级筛选"
+    }
+  ],
+  "object_properties": [
+    {
+      "id": "requires",
+      "label": "要求",
+      "domain": [
+        "FoodProduct",
+        "MethodVariant"
+      ],
+      "range": "RecipeRequirement",
+      "definition": "菜谱或做法变体对一项原料的要求。方向固定为 食物→要求，不允许反向声明。",
+      "source": "scripts/recipe_data.py:397-398"
+    },
+    {
+      "id": "hasOption",
+      "label": "候选",
+      "domain": "RecipeRequirement",
+      "range": "RequirementOption",
+      "definition": "一项原料要求下可接受的候选资源，多个候选之间为「或」。",
+      "source": "scripts/recipe_data.py:62-65 Requirement.options"
+    },
+    {
+      "id": "refersTo",
+      "label": "指向资源",
+      "domain": "RequirementOption",
+      "range": "PantryItem",
+      "definition": "一个要求项所指向的具体厨房资源，决定该项属于食材、佐料还是厨具。",
+      "source": "scripts/recipe_data.py:53-60 Material.name / kind"
+    },
+    {
+      "id": "broader",
+      "label": "上位原料",
+      "domain": "PantryItem",
+      "range": "PantryItem",
+      "characteristics": [
+        "Transitive",
+        "Asymmetric",
+        "Irreflexive"
+      ],
+      "definition": "「具体原料 → 可被它满足的较宽标签」的单向覆盖关系。选中具体项可满足上位要求，反之不成立；可跨多级传递，如 茉莉绿茶 → 绿茶 → 茶叶。",
+      "source": "recipe/原料标签单向匹配规则.txt [单向规则] 61 条；scripts/recipe_data.py:401-423",
+      "note": "同义归一（西红柿→番茄）不属于本关系，属 skos:altLabel，二者不可混用。"
+    },
+    {
+      "id": "usesPreparation",
+      "label": "使用配料",
+      "domain": "Dish",
+      "range": "Preparation",
+      "definition": "菜品把某个半成品配料作为组成部件引用。配料自身的构成由该配料的 requires 描述，二者串成「菜品—配料—原料」的组成链。",
+      "source": "scripts/recipe_data.py:90-95；:171-177"
+    },
+    {
+      "id": "hasVariant",
+      "label": "有做法",
+      "domain": "FoodProduct",
+      "range": "MethodVariant",
+      "definition": "菜谱包含的互斥做法分支。存在变体时原料要求挂在变体上而非菜品上。",
+      "source": "scripts/recipe_data.py:361-381"
+    },
+    {
+      "id": "belongsToCategory",
+      "label": "属于分类",
+      "domain": "Dish",
+      "range": "DishCategory",
+      "definition": "菜品所属的烹饪方式分类，一道菜恰好属于一个分类。",
+      "source": "scripts/recipe_data.py:397 Recipe.category"
+    },
+    {
+      "id": "hasDifficulty",
+      "label": "难度为",
+      "domain": "FoodProduct",
+      "range": "DifficultyLevel",
+      "definition": "食物对应的难度等级，取值 1-5，用于筛选与推荐。",
+      "source": "scripts/recipe_data.py:397 Recipe.difficulty"
+    }
+  ],
+  "datatype_properties": [
+    {
+      "id": "name",
+      "label": "名称",
+      "range": "xsd:string",
+      "definition": "食物或厨房资源的规范名称，抽取时已按同义词表归一。",
+      "source": "scripts/recipe_data.py:98-99；:21-32 ALIASES 39 条"
+    },
+    {
+      "id": "grams",
+      "label": "克数",
+      "range": "xsd:decimal",
+      "definition": "原文给出明确克数时填写的重量；「适量/少许」或只给体积、个数时留空。",
+      "source": "scripts/recipe_data.py:161-166"
+    },
+    {
+      "id": "quantityText",
+      "label": "原始用量文本",
+      "range": "xsd:string",
+      "definition": "原文用量表述，如「1.5 个」「0-2g」「适量」，保留原样以便回溯。",
+      "source": "scripts/recipe_data.py:256-271"
+    },
+    {
+      "id": "isApproximate",
+      "label": "用量为约数",
+      "range": "xsd:boolean",
+      "definition": "用量文本含「约/左右」时置真。",
+      "source": "scripts/recipe_data.py:265-268"
+    },
+    {
+      "id": "isOptional",
+      "label": "是否可选",
+      "range": "xsd:boolean",
+      "definition": "原料要求是否为可选项。false 为必需，缺料即判为不可做；true 为可选。",
+      "source": "scripts/recipe_data.py:62-65；:11"
+    },
+    {
+      "id": "description",
+      "label": "简介",
+      "range": "xsd:string",
+      "source": "scripts/recipe_data.py:356-357"
+    },
+    {
+      "id": "energyText",
+      "label": "热量文本",
+      "range": "xsd:string",
+      "definition": "原文给出的预估热量文本，未统一单位，故保留字符串。",
+      "source": "scripts/recipe_data.py:358-360"
+    },
+    {
+      "id": "sourceRef",
+      "label": "出处",
+      "range": "xsd:string",
+      "definition": "菜谱来源标识，用于阶段二的证据回溯。",
+      "source": "CSV 第 2 列；scripts/recipe_data.py:397"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "C1",
+      "name": "菜品必须有要求或变体",
+      "statement": "每个 Dish 至少有一条 requires，或至少有一个 hasVariant。",
+      "owl_encoding": "Dish ⊑ (∃requires.RecipeRequirement) ⊔ (∃hasVariant.MethodVariant)",
+      "check": "对实例：len(requirements) >= 1 or len(variants) >= 1"
+    },
+    {
+      "id": "C2",
+      "name": "要求必须至少有一个候选",
+      "statement": "每个 RecipeRequirement 至少有 1 个 RequirementOption。",
+      "owl_encoding": "RecipeRequirement ⊑ ≥1 hasOption.RequirementOption",
+      "check": "对实例：all(len(group.options) >= 1)"
+    },
+    {
+      "id": "C3",
+      "name": "必需/可选必须显式声明",
+      "statement": "每个 RecipeRequirement 恰好有一个 isOptional 布尔值，缺省不允许。",
+      "owl_encoding": "RecipeRequirement ⊑ =1 isOptional.xsd:boolean",
+      "check": "对实例：group.optional in (True, False)"
+    },
+    {
+      "id": "C4",
+      "name": "同要求下多候选为多选一",
+      "statement": "同一 RecipeRequirement 下的多个 RequirementOption 之间是「或」：命中任一即该项通过；不是「全部都需要」。",
+      "owl_encoding": "无法用 OWL 表达（OWL 不区分与/或），以语义约定 + 检查脚本实现",
+      "check": "planner.check() 中 any(...) 语义；反例检查：同一组的两个候选不应同时被要求"
+    },
+    {
+      "id": "C5",
+      "name": "上位覆盖单向不可逆",
+      "statement": "broader 传递、非对称、非自反。选中具体项可满足上位要求，只选上位项不能满足具体要求。",
+      "owl_encoding": "TransitiveObjectProperty + AsymmetricObjectProperty + IrreflexiveObjectProperty",
+      "check": "expand(selected) 求传递闭包；断言 rejected ∩ covered = ∅（见 test_planner.test_examples_from_rule_file）"
+    },
+    {
+      "id": "C6",
+      "name": "有变体时要求下沉",
+      "statement": "存在 MethodVariant 的菜谱，原料要求挂在变体上，菜品级 requires 为空。",
+      "owl_encoding": "C1 的并集 + MethodVariant ⊑ ≥1 requires.RecipeRequirement",
+      "check": "对实例：有 variants 则 requirements == []，且每个 variant 非空"
+    },
+    {
+      "id": "C7",
+      "name": "克数缺失表示信息不足",
+      "statement": "原文未给出明确克数时 grams 留空，留空不等于 0，也不能据此断言「不需要该原料」。",
+      "owl_encoding": "无数值公理；以注释与检查脚本表达",
+      "check": "对实例：grams is None 的项必须能回溯到「适量/少许/无数值」的原文片段"
+    },
+    {
+      "id": "C8",
+      "name": "类互斥与多重归类",
+      "statement": "食材、佐料、厨具三者两两互斥；菜品与配料互斥；配料同时属于可制作食物与食材，因此 FoodProduct 与 PantryItem 不可声明互斥。",
+      "owl_encoding": "AllDisjointClasses(Ingredient, Seasoning, Tool) + Dish disjointWith Preparation, PantryItem",
+      "check": "对实例：kind_of() 对同一名称只返回一个 kind；配料名同时可作 ingredient 选中"
+    }
+  ],
+  "individuals": {
+    "note": "以下为概念层的受控枚举，不是菜谱实例。菜谱实例由 recipe/ 抽取，不在此文件内。",
+    "DishCategory": [
+      "炒菜",
+      "炖菜",
+      "蒸菜",
+      "煮锅",
+      "砂锅菜",
+      "汤",
+      "凉拌",
+      "卤菜",
+      "炸品",
+      "烤类",
+      "烫菜",
+      "早餐",
+      "主食",
+      "饮品"
+    ],
+    "DifficultyLevel": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "instance_mapping": [
+    {
+      "ontology": "Dish",
+      "code": "Recipe.category != '配料'",
+      "count": 672
+    },
+    {
+      "ontology": "Preparation",
+      "code": "Recipe.category == '配料'（recipe/配料/*.md）",
+      "count": 51
+    },
+    {
+      "ontology": "RecipeRequirement",
+      "code": "Recipe.requirements（菜品级）",
+      "count": 5897
+    },
+    {
+      "ontology": "RecipeRequirement.isOptional=false",
+      "code": "Requirement.optional == False",
+      "count": 5689
+    },
+    {
+      "ontology": "RecipeRequirement.isOptional=true",
+      "code": "Requirement.optional == True",
+      "count": 208
+    },
+    {
+      "ontology": "RequirementOption",
+      "code": "Requirement.options 展开后的 Material",
+      "count": 6097
+    },
+    {
+      "ontology": "RequirementOption.grams",
+      "code": "Material.grams is not None",
+      "count": 1991
+    },
+    {
+      "ontology": "broader",
+      "code": "原料标签单向匹配规则.txt [单向规则]",
+      "count": 60
+    },
+    {
+      "ontology": "skos:altLabel",
+      "code": "recipe_data.ALIASES（同义归一，非上位关系）",
+      "count": 66
+    },
+    {
+      "ontology": "MethodVariant",
+      "code": "Recipe.variants 中的每个分支",
+      "count": 2
+    }
+  ],
+  "stats": {
+    "recipe_files": 723,
+    "dishes": 672,
+    "preparations": 51,
+    "dish_categories": 14,
+    "distinct_csv_labels": 636,
+    "vocabulary_terms": 669,
+    "requirement_groups_dish_level": 5897,
+    "requirement_options": 6097,
+    "options_with_grams": 1991,
+    "gram_coverage": 0.327,
+    "broader_rules": 60,
+    "aliases": 66,
+    "dishes_without_energy": 68
+  },
+  "open_issues": [
+    {
+      "id": "O1",
+      "issue": "仍有 1042 个抽取出的原料名不在 CSV 标签或规则词表中（如 内酯豆腐、葱姜末、恒顺陈醋）。",
+      "impact": "剩余部分多为真同义、复合名与品牌名，需逐条对照原文判断，可能造成漏配。",
+      "status": "已修正 62 个（修饰语剥离 + 切配形态归一），其余留待下一轮"
+    },
+    {
+      "id": "O2",
+      "issue": "上位规则左项不在 CSV 标签表（原为「小元宵」）。",
+      "impact": "该规则永不触发，规则表与标签表不一致。",
+      "status": "已修正：删除该规则，规则数 61→60，复查 0 条"
+    },
+    {
+      "id": "O3",
+      "issue": "做法变体仍由 if name == '原味豆浆' 硬编码支持，本体已抽象为 MethodVariant，代码未通用化。",
+      "impact": "概念层与实现层存在缺口，报告需说明。",
+      "status": "待阶段三改造"
+    },
+    {
+      "id": "O4",
+      "issue": "68 道菜无热量文本，克数覆盖率仅 32.7%。",
+      "impact": "涉及用量推断的任务只能标注为信息不足，不可补全。",
+      "status": "按约束 C7 保留，不作为缺陷修正"
+    },
+    {
+      "id": "O5",
+      "issue": "SEASONINGS 与 TOOL 两个集合未并入 vocabulary，导致「白砂糖」「花雕酒」等已知名称不参与形态归一判定。",
+      "impact": "造成阶段二对照实验 6 条漏检，形式检查无法覆盖语义错误。",
+      "status": "阶段二发现，待下一轮统一词表"
+    },
+    {
+      "id": "O6",
+      "issue": "PantryItem 只有 kind（食材/佐料/厨具），没有「有/没有」的极性。而接口里 ingredients 是正向、seasonings/tools 是反向，导致「我有大蒜」无处表达（大蒜属 Seasoning）。",
+      "impact": "阶段三自然语言入口无法表达「我有某佐料」，模型把佐料写进 ingredients 会被校验层当作种类错配丢弃。",
+      "status": "阶段三发现，需新增 AvailabilityAssertion（含极性）才能根治"
+    },
+    {
+      "id": "O7",
+      "issue": "本体没有口味、菜系、场景、营养等维度，14 个分类只覆盖做法。",
+      "impact": "「想吃辣」「川菜」「减脂」无法映射到任何槽位，只能记为 unsupported。",
+      "status": "阶段三按 unsupported_dimensions 显式标注，不臆造分类"
+    }
+  ]
+}
