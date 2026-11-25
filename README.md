@@ -1,22 +1,20 @@
 # 今天吃什么，是啊吃什么
 
-> 已完成一次代码与实验审查。请先看 [审查与运行说明](REVIEW.md)：新增自然语言页面入口、真实本体上下文、严格参数验证和修正后的评测；下文及 stage3 原报告的数值属于历史版本。Windows 保持原 `cook` / Python 3.13 环境，见 [Windows 启动说明](WINDOWS.md)。
+> 已完成一次代码与实验审查：新增自然语言页面入口、真实本体上下文、严格参数验证和修正后的评测。下文及 `stage3/` 原报告的数值属于历史版本，重评分结果见 `stage3/runs/historical-rescore/`。
 
 本地菜谱选择器。FastAPI 在启动时读取 `recipe` 下的 CSV、Markdown 和单向匹配规则，并为同一页面提供数据接口。前端无需额外构建。
 
-## Windows 快速启动
-
-在 Anaconda Prompt 中进入解压目录，依次运行 `install_windows.bat`、`verify_windows.bat`、`start_windows.bat`。已有 Python 3.13 的 `cook` 环境会复用。详细说明见 [WINDOWS.md](WINDOWS.md)。
-
 ## 本地运行
 
-在仓库根目录（本文件所在目录）执行以下命令。已有 `cook` 环境时可跳过创建步骤。
+在仓库根目录（本文件所在目录）执行以下命令。已有 Python 3.13 的 `cook` 环境时可跳过创建步骤。
 
 ```powershell
-conda create -n cook python=3.13 pip -y
-conda run -n cook python -s -m pip install -r requirements.txt
+conda create -n cook python=3.13 -y
+conda run -n cook python -s -m pip install fastapi==0.165.0 uvicorn==0.54.0 pydantic==2.14.4
 conda run -n cook --no-capture-output python -s -m uvicorn scripts.main:app --host 127.0.0.1 --port 8000
 ```
+
+运行依赖只有 `fastapi`、`uvicorn`、`pydantic`，版本以上面锁定值为准（Python 3.13 已实测）。跑测试另需 `httpx==0.28.1`。
 
 打开 [菜谱选择器](http://127.0.0.1:8000/) 或 [接口文档](http://127.0.0.1:8000/docs)。在启动服务的终端按 Ctrl+C 可停止。修改菜谱数据后重启服务以重新读取。
 
@@ -60,12 +58,17 @@ python -m scripts.quality_check eval                # 构造错误样例的对�
 
 方式一 · 本地配置文件（推荐，配一次长期有效）：
 
-```powershell
-Copy-Item llm.example.json llm.local.json   # 再填写 base_url / api_key / model
-python -m scripts.llm_client                # 检查配置是否被读到，密钥只显示首尾
+在项目根目录新建 `llm.local.json`，填三个必填项：
+
+```json
+{"base_url": "https://your-gateway/v1", "api_key": "sk-...", "model": "your-model"}
 ```
 
-`llm.local.json` 已被 `.gitignore` 忽略，不会进仓库；仓库里只保留 `llm.example.json` 模板。
+该文件已被 `.gitignore` 忽略，不会进仓库。可先自检，密钥只显示首尾：
+
+```powershell
+python -m scripts.llm_client
+```
 
 方式二 · 环境变量（临时覆盖，适合切换模型或跑 CI）：
 

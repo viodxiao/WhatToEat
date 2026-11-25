@@ -14,7 +14,8 @@
        {"base_url": "...", "api_key": "...", "model": "...",
         "temperature": 0, "timeout": 75, "max_tokens": 4000}
 
-   模板见 `llm.example.json`。也可以用 `WTE_LLM_CONFIG` 指定别的路径。
+   三个必填项 base_url / api_key / model，可选 temperature / timeout / max_tokens。
+   也可以用 `WTE_LLM_CONFIG` 指定别的路径。
 
 配置文件只是省去每次开终端都要 set 的麻烦；凭据仍然不写进被版本管理的文件。
 未配置时 `Client.configured` 为 False，评测脚本会拒绝出正式结果，
@@ -170,7 +171,7 @@ class Client:
     def chat(self, system: str, user: str, *, json_mode: bool = True) -> dict:
         if not self.configured:
             raise LLMError(f"未配置模型：请设置 WTE_LLM_BASE_URL / WTE_LLM_API_KEY / WTE_LLM_MODEL，"
-                           f"或复制 llm.example.json 为 {CONFIG_FILE_NAME} 后填写")
+                           f"或在项目根目录新建 {CONFIG_FILE_NAME} 填写 base_url / api_key / model")
         payload = {
             "model": self.model,
             "temperature": self.temperature,

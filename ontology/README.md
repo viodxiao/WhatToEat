@@ -143,4 +143,4 @@ python -c "from rdflib import Graph;g=Graph();g.parse('ontology/whattoeat.ttl');
 
 ## 本次审查新增
 
-`python -m scripts.export_ontology` 可重建 `instances.json`：规则抽取实例与文件级证据，不更改概念公理。自然语言解析器现在直接读取 `ontology.json` 的概念、关系与约束。详情见 [审查说明](../REVIEW.md)。
+`python -m scripts.export_ontology` 可重建 `instances.json`：规则抽取实例与文件级证据，不更改概念公理。自然语言解析器现在直接读取 `ontology.json` 的概念、关系与约束。

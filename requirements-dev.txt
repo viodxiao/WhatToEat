@@ -1,3 +1,0 @@
-# Original runtime pins plus API test dependencies
--r requirements.txt
-httpx==0.28.1
