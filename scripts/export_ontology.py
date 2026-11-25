@@ -14,7 +14,7 @@ def digest(path):
 
 def export():
     recipes, rules, _ = load_catalog()
-    sources = {str(p.relative_to(ROOT)): {'sha256': digest(p), 'bytes': p.stat().st_size}
+    sources = {p.relative_to(ROOT).as_posix(): {'sha256': digest(p), 'bytes': p.stat().st_size}
                for p in sorted((ROOT / 'recipe').rglob('*')) if p.is_file()}
     instances = []
     for r in recipes.values():

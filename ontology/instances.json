@@ -1,7 +1,7 @@
 {
   "schema_file": "ontology/ontology.json",
   "schema_sha256": "8f35c2f4ba4f221a7be96dcfc66744938e38c10fc6f59ecb060330f9735095a5",
-  "extractor_sha256": "8926b71f095e882aabfb23bf7f5b09ad5b6724ac67f63cd1370d43f40b1e0053",
+  "extractor_sha256": "49f6b9c99a4bfc2a98f145137350ea24d9c658f6243e202f414638b02c8cdc46",
   "method": "deterministic_rule_extraction",
   "evidence_granularity": "file + original materials text; not per-triple entailment proof",
   "sources": {
@@ -882,7 +882,7 @@
       "bytes": 876
     },
     "recipe/汤/玉米排骨汤.md": {
-      "sha256": "827a65e089129644ab52a30b3708162b83e3b0ef1fba45a51058e9aceff8d31c",
+      "sha256": "a826b8f55c7131743611f3c045dc43d4a03959615a0bad4e0c67e1ab0efcbffd",
       "bytes": 2059
     },
     "recipe/汤/生汆丸子汤.md": {
@@ -4908,7 +4908,19 @@
         {
           "options": [
             {
-              "name": "菜刀一个",
+              "name": "菜刀",
+              "kind": "tool",
+              "grams": null,
+              "quantity": null,
+              "approximate": false
+            }
+          ],
+          "optional": false
+        },
+        {
+          "options": [
+            {
+              "name": "笊篱",
               "kind": "ingredient",
               "grams": null,
               "quantity": null,
@@ -4920,20 +4932,8 @@
         {
           "options": [
             {
-              "name": "笊篱一个",
-              "kind": "ingredient",
-              "grams": null,
-              "quantity": null,
-              "approximate": false
-            }
-          ],
-          "optional": false
-        },
-        {
-          "options": [
-            {
-              "name": "锅铲一个",
-              "kind": "ingredient",
+              "name": "锅铲",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -5409,7 +5409,7 @@
         {
           "options": [
             {
-              "name": "鱼头一个",
+              "name": "鱼头",
               "kind": "ingredient",
               "grams": null,
               "quantity": null,
@@ -6381,7 +6381,7 @@
           "options": [
             {
               "name": "防烫盘夹",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -6623,7 +6623,7 @@
           "options": [
             {
               "name": "厨房用夹",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -7864,7 +7864,7 @@
           "options": [
             {
               "name": "面包机",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -7952,7 +7952,7 @@
             },
             {
               "name": "牙签",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -9487,7 +9487,7 @@
           "options": [
             {
               "name": "轻食机",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -13204,7 +13204,7 @@
           "options": [
             {
               "name": "吧勺",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -13228,7 +13228,7 @@
           "options": [
             {
               "name": "打火机",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -13999,14 +13999,14 @@
           "options": [
             {
               "name": "调理机",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
             },
             {
               "name": "果汁机",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -18191,7 +18191,7 @@
           "options": [
             {
               "name": "铝箔纸",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -23754,7 +23754,7 @@
           "options": [
             {
               "name": "烧烤炉",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -24824,7 +24824,7 @@
           "options": [
             {
               "name": "锡箔纸",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -29898,7 +29898,7 @@
           "options": [
             {
               "name": "燃气灶",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -35510,7 +35510,7 @@
         {
           "options": [
             {
-              "name": "胡箩卜",
+              "name": "胡萝卜",
               "kind": "ingredient",
               "grams": null,
               "quantity": null,
@@ -35619,12 +35619,12 @@
       "variants": [],
       "evidence": {
         "file": "recipe/汤/玉米排骨汤.md",
-        "sha256": "827a65e089129644ab52a30b3708162b83e3b0ef1fba45a51058e9aceff8d31c",
+        "sha256": "a826b8f55c7131743611f3c045dc43d4a03959615a0bad4e0c67e1ab0efcbffd",
         "original_source": "HowToCook",
         "materials_text": [
           "排骨",
           "玉米",
-          "胡箩卜",
+          "胡萝卜",
           "生姜",
           "大葱",
           "食用油",
@@ -41474,7 +41474,7 @@
           "options": [
             {
               "name": "电饼铛",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -43835,10 +43835,10 @@
         {
           "options": [
             {
-              "name": "西红柿一个",
+              "name": "番茄",
               "kind": "ingredient",
               "grams": null,
-              "quantity": null,
+              "quantity": "1 个大概 200g 吧。",
               "approximate": false
             }
           ],
@@ -49808,7 +49808,7 @@
           "options": [
             {
               "name": "冰箱",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -50991,7 +50991,7 @@
           "options": [
             {
               "name": "铲子",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -84980,7 +84980,7 @@
           "options": [
             {
               "name": "烘焙纸",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
@@ -93533,7 +93533,7 @@
             },
             {
               "name": "铁板",
-              "kind": "ingredient",
+              "kind": "tool",
               "grams": null,
               "quantity": null,
               "approximate": false
