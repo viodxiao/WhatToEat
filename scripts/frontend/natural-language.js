@@ -33,6 +33,12 @@ async function post(url, body) {
 async function draw(ui) {
   const {element, renderRecipeList} = ui;
   const {parsed, result} = last;
+  // 佐料/厨具在请求体里表示「用户没有」，交给卡片把对应备选项划掉
+  const payload = parsed.search_payload ?? {};
+  const excluded = {
+    seasoning: new Set(payload.seasonings ?? []),
+    tool: new Set(payload.tools ?? []),
+  };
   output.dataset.state = 'done';
   output.replaceChildren();
   output.append(element('p', 'nl-hint', parsed.assumptions.join('；')));
@@ -44,7 +50,7 @@ async function draw(ui) {
     renderRecipeList(group, items, limits[key], async () => {
       limits[key] += 12;
       await draw(await renderer());
-    });
+    }, excluded);
     output.append(group);
   }
   if (!result.ready.length && !result.related.length) {

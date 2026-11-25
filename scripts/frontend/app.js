@@ -144,14 +144,14 @@ function renderSelected() {
       holder.append(chip);
     }
   }
-  if (!holder.childElementCount) holder.append(element("p", "", "点击标签标记手头有的食材、缺少的佐料和厨具。"));
+  if (!holder.childElementCount) holder.append(element("p", "", "点击标签：食材选你有的，佐料和厨具选你缺的。"));
   $("#clear").hidden = difficulties.size === 5 && !categories.size && !kinds.some(kind => choices[kind].size);
 }
 
 function buildFilters(facets, categoryNames) {
   for (const kind of kinds) {
     const caption = element("div", "filter-caption");
-    caption.append(element("h3", "", labels[kind]), element("span", "", kind === "ingredient" ? "我手头有" : "我手头缺"));
+    caption.append(element("h3", "", labels[kind]), element("span", "", kind === "ingredient" ? "我手头有" : "只填我缺的"));
     const container = element("div");
     const search = element("label", "filter-input-wrap");
     search.style.display = "block";
@@ -261,7 +261,7 @@ function recipeDetailsButton(recipe) {
   }, `查看${recipe.name}详情`);
 }
 
-function recipeCard(recipe) {
+function recipeCard(recipe, excluded = null) {
   const { missing = [] } = recipe;
   const card = element("article", "recipe-card");
   const top = element("div", "card-top");
@@ -281,7 +281,14 @@ function recipeCard(recipe) {
     const line = element("div", "preview-line");
     line.append(element("strong", "", labels[kind]));
     if (!recipe.labels[kind].length) line.append(element("span", "", "—"));
-    for (const label of recipe.labels[kind]) line.append(element("span", "", label));
+    for (const label of recipe.labels[kind]) {
+      // 佐料/厨具在菜谱里常常是「备选」而非「必备」：一组里只要有一项没被标记缺就够用。
+      // 这里把用户声明缺的那一项划掉，避免把「砂锅 / 深汤锅」读成「必须有砂锅」。
+      const out = kind !== "ingredient" && Boolean(excluded?.[kind]?.has(label));
+      const node = element("span", out ? "label-missing" : "", label);
+      if (out) node.title = `你标记了没有${labels[kind]}「${label}」`;
+      line.append(node);
+    }
     preview.append(line);
   }
   if (missing.length) preview.append(element("p", "missing", `还缺 ${missing.join("、")}`));
@@ -289,9 +296,9 @@ function recipeCard(recipe) {
   return card;
 }
 
-function renderRecipeList(target, recipes, limit = recipes.length, onMore) {
+function renderRecipeList(target, recipes, limit = recipes.length, onMore, excluded = null) {
   const list = element("div", "result-list");
-  list.append(...recipes.slice(0, limit).map(recipeCard));
+  list.append(...recipes.slice(0, limit).map(recipe => recipeCard(recipe, excluded)));
   target.append(list);
   if (recipes.length > limit) target.append(button("显示更多", "subtle more", onMore));
 }
@@ -301,6 +308,8 @@ function renderResults() {
   output.replaceChildren();
   const status = $("#result-count");
   status.textContent = "";
+  // 用户声明「缺」的佐料/厨具，用于在卡片里划掉对应备选项（见 recipeCard）
+  const excluded = { seasoning: choices.seasoning, tool: choices.tool };
   if (recipeSearch.value.trim()) {
     status.textContent = `${nameMatches.length} 道菜谱`;
     if (!nameMatches.length) {
@@ -310,7 +319,7 @@ function renderResults() {
     renderRecipeList(output, nameMatches, nameLimit, () => {
       nameLimit += 14;
       renderResults();
-    });
+    }, excluded);
     return;
   }
   if (!difficulties.size) {
@@ -322,7 +331,7 @@ function renderResults() {
       output.append(element("p", "recipe-hint secondary", "请至少选择一种你有的食材吧"));
     }
     if (recommendations.length) {
-      renderRecipeList(output, recommendations);
+      renderRecipeList(output, recommendations, recommendations.length, undefined, excluded);
     } else {
       output.append(element("p", "results-empty", "没有符合当前条件的菜谱。"));
     }
@@ -342,7 +351,7 @@ function renderResults() {
     renderRecipeList(group, recipes, resultLimits[key], () => {
       resultLimits[key] += 14;
       renderResults();
-    });
+    }, excluded);
     output.append(group);
   }
 }
