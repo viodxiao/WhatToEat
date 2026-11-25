@@ -1,0 +1,9 @@
+{
+  "_说明": "复制本文件为 llm.local.json 并填写自己的配置。llm.local.json 已被 .gitignore 忽略，不会进入仓库。环境变量 WTE_LLM_* 优先于本文件。",
+  "base_url": "https://your-gateway/v1",
+  "api_key": "sk-...",
+  "model": "your-model-name",
+  "temperature": 0,
+  "timeout": 75,
+  "max_tokens": 4000
+}

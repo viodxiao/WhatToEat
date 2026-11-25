@@ -1,3 +1,37 @@
+# 虚拟环境（PyCharm / conda / venv 都会生成，体积大且与本机绑定，不纳入版本库）
 .conda/
+.venv/
+venv/
+env/
+
+# Python 缓存与构建产物
 __pycache__/
 *.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE 配置（个人本地设置，不应提交）
+.idea/
+.vscode/
+
+# 操作系统杂项
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本地临时文件
+*.log
+*.tmp
+
+# 本地模型配置（含密钥，只提交 llm.example.json 模板）
+llm.local.json
+config/*.local.json
+
+# 阶段三：桩冒烟产物（不是实验数据，不得混进正式记录）
+stage3/**/records_stub/
+stage3/**/results_stub.json
+# 桩冒烟的运行目录（仅验证流程能跑通，结果全为空参数）
+stage3/runs/smoke/
+stage3/runs/smoke-final/
