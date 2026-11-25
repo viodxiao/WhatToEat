@@ -1,0 +1,68 @@
+{
+  "task_id": "T01",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有虾仁和鸡蛋，但没有料酒",
+  "raw_response": "{\"dishes\": [\"虾仁炒蛋\", \"虾仁蒸蛋\", \"虾仁滑蛋\", \"虾仁蛋花汤\", \"虾仁蛋炒饭\"], \"notes\": \"没有料酒可用姜汁或柠檬汁去腥，或直接忽略。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 98,
+      "prompt_tokens": 139,
+      "total_tokens": 237,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 4269
+  },
+  "dishes": [
+    "虾仁炒蛋",
+    "虾仁蒸蛋",
+    "虾仁滑蛋",
+    "虾仁蛋花汤",
+    "虾仁蛋炒饭"
+  ],
+  "matched": [
+    {
+      "name": "虾仁炒蛋",
+      "id": null
+    },
+    {
+      "name": "虾仁蒸蛋",
+      "id": null
+    },
+    {
+      "name": "虾仁滑蛋",
+      "id": "炒菜/洋葱虾仁滑蛋"
+    },
+    {
+      "name": "虾仁蛋花汤",
+      "id": null
+    },
+    {
+      "name": "虾仁蛋炒饭",
+      "id": "主食/蛋炒饭"
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "炒菜/洋葱虾仁滑蛋",
+        "name": "虾仁滑蛋"
+      },
+      {
+        "id": "主食/蛋炒饭",
+        "name": "虾仁蛋炒饭"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 2,
+  "feasible_rate": 0.0
+}

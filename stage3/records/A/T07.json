@@ -1,0 +1,59 @@
+{
+  "task_id": "T07",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有山药和排骨，想蒸个菜",
+  "raw_response": "{\"dishes\": [\"山药蒸排骨\", \"粉蒸排骨\", \"清蒸山药排骨\", \"豆豉蒸排骨\", \"香菇蒸排骨\"], \"notes\": \"优先推荐山药蒸排骨，直接利用现有食材；若备有米粉可做粉蒸排骨；豆豉和香菇需额外配料。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 201,
+      "prompt_tokens": 140,
+      "total_tokens": 341,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 6757
+  },
+  "dishes": [
+    "山药蒸排骨",
+    "粉蒸排骨",
+    "清蒸山药排骨",
+    "豆豉蒸排骨",
+    "香菇蒸排骨"
+  ],
+  "matched": [
+    {
+      "name": "山药蒸排骨",
+      "id": null
+    },
+    {
+      "name": "粉蒸排骨",
+      "id": null
+    },
+    {
+      "name": "清蒸山药排骨",
+      "id": null
+    },
+    {
+      "name": "豆豉蒸排骨",
+      "id": null
+    },
+    {
+      "name": "香菇蒸排骨",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": []
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 0,
+  "feasible_rate": 0.0
+}

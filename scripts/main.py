@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .llm_client import Client
 from .planner import Planner
 from .recipe_data import RECIPE_DIR, canonical, load_catalog
 
@@ -50,6 +51,8 @@ async def lifespan(app):
     app.state.planner = Planner(*load_catalog())
     app.state.recipe_categories = sorted(path.name for path in RECIPE_DIR.iterdir()
                                          if path.is_dir() and path.name != "配料")
+    # 启动时读一次模型配置（环境变量优先，其次项目根目录 llm.local.json）
+    app.state.llm_client = Client.load()
     yield
 
 
@@ -115,3 +118,27 @@ def shopping(basket: Basket, request: Request):
     if any(recipe_id not in planner.recipes for recipe_id in basket.ids):
         raise HTTPException(404, "选中的菜谱不存在")
     return planner.shopping(basket.ids, *basket.choices(), include_missing=basket.include_missing)
+
+
+class NaturalLanguageRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    use_ontology: bool = True
+
+
+@app.post('/api/parse')
+def parse_natural_language(body: NaturalLanguageRequest, request: Request):
+    from .agent import parse_request
+    from .llm_client import Client, LLMError
+    from .nl_query import ontology_view
+    client = getattr(request.app.state, 'llm_client', None) or Client.load()
+    if not client.configured:
+        raise HTTPException(503, '请配置 WTE_LLM_BASE_URL、WTE_LLM_API_KEY、WTE_LLM_MODEL，'
+                                 '或填写项目根目录的 llm.local.json')
+    try:
+        planner = request.app.state.planner
+        return parse_request(body.text, planner, ontology_view(planner), client,
+                             use_ontology=body.use_ontology)
+    except ValueError:
+        raise HTTPException(422, '模型返回的搜索参数不合法，请重新描述需求') from None
+    except LLMError:
+        raise HTTPException(502, '模型调用或响应解析失败，请检查服务配置') from None

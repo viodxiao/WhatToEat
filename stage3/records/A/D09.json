@@ -1,0 +1,68 @@
+{
+  "task_id": "D09",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "家里只有豆腐和白菜，想炖一锅",
+  "raw_response": "{\"dishes\": [\"白菜炖豆腐\", \"白菜豆腐汤\", \"白菜豆腐煲\", \"白菜炖冻豆腐\", \"白菜豆腐粉条炖锅\"], \"notes\": \"如果家里有粉条或冻豆腐，可以加进去更丰富；没有的话，前两道最基础。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 87,
+      "prompt_tokens": 141,
+      "total_tokens": 228,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 6050
+  },
+  "dishes": [
+    "白菜炖豆腐",
+    "白菜豆腐汤",
+    "白菜豆腐煲",
+    "白菜炖冻豆腐",
+    "白菜豆腐粉条炖锅"
+  ],
+  "matched": [
+    {
+      "name": "白菜炖豆腐",
+      "id": "炖菜/白菜炖豆腐"
+    },
+    {
+      "name": "白菜豆腐汤",
+      "id": null
+    },
+    {
+      "name": "白菜豆腐煲",
+      "id": "砂锅菜/火腿白菜豆腐煲"
+    },
+    {
+      "name": "白菜炖冻豆腐",
+      "id": null
+    },
+    {
+      "name": "白菜豆腐粉条炖锅",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "炖菜/白菜炖豆腐",
+        "name": "白菜炖豆腐"
+      },
+      {
+        "id": "砂锅菜/火腿白菜豆腐煲",
+        "name": "白菜豆腐煲"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 2,
+  "feasible_rate": 0.0
+}

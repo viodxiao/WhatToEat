@@ -1,0 +1,80 @@
+{
+  "task_id": "T02",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "想吃烤的，有鸡翅，也有烤箱",
+  "raw_response": "{\"dishes\": [\"蜜汁烤鸡翅\", \"蒜香烤鸡翅\", \"黑椒烤鸡翅\", \"奥尔良烤鸡翅\", \"柠檬烤鸡翅\"], \"notes\": \"鸡翅是主料，烤箱可做多种风味，按常见程度排序。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 100,
+      "prompt_tokens": 141,
+      "total_tokens": 241,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 2799
+  },
+  "dishes": [
+    "蜜汁烤鸡翅",
+    "蒜香烤鸡翅",
+    "黑椒烤鸡翅",
+    "奥尔良烤鸡翅",
+    "柠檬烤鸡翅"
+  ],
+  "matched": [
+    {
+      "name": "蜜汁烤鸡翅",
+      "id": "烤类/烤鸡翅"
+    },
+    {
+      "name": "蒜香烤鸡翅",
+      "id": "烤类/烤鸡翅"
+    },
+    {
+      "name": "黑椒烤鸡翅",
+      "id": "烤类/烤鸡翅"
+    },
+    {
+      "name": "奥尔良烤鸡翅",
+      "id": "烤类/烤鸡翅"
+    },
+    {
+      "name": "柠檬烤鸡翅",
+      "id": "烤类/烤鸡翅"
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "烤类/烤鸡翅",
+        "name": "蜜汁烤鸡翅"
+      },
+      {
+        "id": "烤类/烤鸡翅",
+        "name": "蒜香烤鸡翅"
+      },
+      {
+        "id": "烤类/烤鸡翅",
+        "name": "黑椒烤鸡翅"
+      },
+      {
+        "id": "烤类/烤鸡翅",
+        "name": "奥尔良烤鸡翅"
+      },
+      {
+        "id": "烤类/烤鸡翅",
+        "name": "柠檬烤鸡翅"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 5,
+  "feasible_rate": 0.0
+}

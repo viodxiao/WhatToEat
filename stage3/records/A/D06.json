@@ -1,0 +1,68 @@
+{
+  "task_id": "D06",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "想吃凉拌菜，有黄瓜和木耳",
+  "raw_response": "{\"dishes\": [\"凉拌黄瓜木耳\", \"拍黄瓜\", \"凉拌木耳\", \"黄瓜拌木耳\", \"凉拌双耳\"], \"notes\": \"黄瓜和木耳是经典搭配，可加蒜末、醋、生抽、香油调味；若想更丰富，可加花生米或香菜。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 132,
+      "prompt_tokens": 140,
+      "total_tokens": 272,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 5561
+  },
+  "dishes": [
+    "凉拌黄瓜木耳",
+    "拍黄瓜",
+    "凉拌木耳",
+    "黄瓜拌木耳",
+    "凉拌双耳"
+  ],
+  "matched": [
+    {
+      "name": "凉拌黄瓜木耳",
+      "id": "凉拌/凉拌黄瓜"
+    },
+    {
+      "name": "拍黄瓜",
+      "id": null
+    },
+    {
+      "name": "凉拌木耳",
+      "id": "凉拌/凉拌木耳"
+    },
+    {
+      "name": "黄瓜拌木耳",
+      "id": null
+    },
+    {
+      "name": "凉拌双耳",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "凉拌/凉拌黄瓜",
+        "name": "凉拌黄瓜木耳"
+      },
+      {
+        "id": "凉拌/凉拌木耳",
+        "name": "凉拌木耳"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 1,
+  "items_total": 2,
+  "feasible_rate": 0.5
+}

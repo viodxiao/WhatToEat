@@ -1,0 +1,76 @@
+{
+  "task_id": "D08",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有剩米饭、鸡蛋和火腿肠，想当主食吃",
+  "raw_response": "{\"dishes\": [\"火腿蛋炒饭\", \"蛋炒饭\", \"鸡蛋火腿炒饭\", \"蛋包饭\", \"火腿鸡蛋饼\"], \"notes\": \"以剩米饭为主，搭配鸡蛋和火腿肠，简单快手的家常主食。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 104,
+      "prompt_tokens": 144,
+      "total_tokens": 248,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 3205
+  },
+  "dishes": [
+    "火腿蛋炒饭",
+    "蛋炒饭",
+    "鸡蛋火腿炒饭",
+    "蛋包饭",
+    "火腿鸡蛋饼"
+  ],
+  "matched": [
+    {
+      "name": "火腿蛋炒饭",
+      "id": "主食/蛋炒饭"
+    },
+    {
+      "name": "蛋炒饭",
+      "id": "主食/蛋炒饭"
+    },
+    {
+      "name": "鸡蛋火腿炒饭",
+      "id": null
+    },
+    {
+      "name": "蛋包饭",
+      "id": "主食/蛋包饭"
+    },
+    {
+      "name": "火腿鸡蛋饼",
+      "id": "早餐/蛋饼"
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "主食/蛋炒饭",
+        "name": "火腿蛋炒饭"
+      },
+      {
+        "id": "主食/蛋炒饭",
+        "name": "蛋炒饭"
+      },
+      {
+        "id": "主食/蛋包饭",
+        "name": "蛋包饭"
+      },
+      {
+        "id": "早餐/蛋饼",
+        "name": "火腿鸡蛋饼"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 4,
+  "feasible_rate": 0.0
+}

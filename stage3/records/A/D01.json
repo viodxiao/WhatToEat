@@ -1,0 +1,64 @@
+{
+  "task_id": "D01",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "我有番茄和鸡蛋，想吃简单点的",
+  "raw_response": "{\"dishes\": [\"番茄炒蛋\", \"番茄蛋汤\", \"番茄鸡蛋面\", \"番茄鸡蛋饼\", \"蒸蛋羹\"], \"notes\": \"都是简单快手的家常做法，番茄和鸡蛋的经典搭配。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 100,
+      "prompt_tokens": 139,
+      "total_tokens": 239,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 3233
+  },
+  "dishes": [
+    "番茄炒蛋",
+    "番茄蛋汤",
+    "番茄鸡蛋面",
+    "番茄鸡蛋饼",
+    "蒸蛋羹"
+  ],
+  "matched": [
+    {
+      "name": "番茄炒蛋",
+      "id": null
+    },
+    {
+      "name": "番茄蛋汤",
+      "id": null
+    },
+    {
+      "name": "番茄鸡蛋面",
+      "id": null
+    },
+    {
+      "name": "番茄鸡蛋饼",
+      "id": "早餐/蛋饼"
+    },
+    {
+      "name": "蒸蛋羹",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "早餐/蛋饼",
+        "name": "番茄鸡蛋饼"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 1,
+  "feasible_rate": 0.0
+}

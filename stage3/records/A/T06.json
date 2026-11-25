@@ -1,0 +1,72 @@
+{
+  "task_id": "T06",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "家里没有生抽也没有料酒，只有青菜和面条",
+  "raw_response": "{\"dishes\": [\"清汤面\", \"蒜蓉炒青菜\", \"青菜鸡蛋面（如有鸡蛋）\", \"葱油拌面（用葱和油）\", \"青菜面疙瘩\"], \"notes\": \"基于仅有青菜和面条，推荐简单家常做法，调料可用盐、油、葱等基本调味。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 148,
+      "prompt_tokens": 141,
+      "total_tokens": 289,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 5321
+  },
+  "dishes": [
+    "清汤面",
+    "蒜蓉炒青菜",
+    "青菜鸡蛋面（如有鸡蛋）",
+    "葱油拌面（用葱和油）",
+    "青菜面疙瘩"
+  ],
+  "matched": [
+    {
+      "name": "清汤面",
+      "id": "主食/汤面"
+    },
+    {
+      "name": "蒜蓉炒青菜",
+      "id": "炒菜/炒青菜"
+    },
+    {
+      "name": "青菜鸡蛋面（如有鸡蛋）",
+      "id": null
+    },
+    {
+      "name": "葱油拌面（用葱和油）",
+      "id": "主食/葱油拌面"
+    },
+    {
+      "name": "青菜面疙瘩",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "主食/汤面",
+        "name": "清汤面"
+      },
+      {
+        "id": "炒菜/炒青菜",
+        "name": "蒜蓉炒青菜"
+      },
+      {
+        "id": "主食/葱油拌面",
+        "name": "葱油拌面（用葱和油）"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 1,
+  "items_total": 3,
+  "feasible_rate": 0.333
+}

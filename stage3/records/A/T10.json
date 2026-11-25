@@ -1,0 +1,59 @@
+{
+  "task_id": "T10",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有酸奶和芒果，想做甜品",
+  "raw_response": "{\"dishes\": [\"芒果酸奶杯\", \"芒果酸奶昔\", \"芒果酸奶冻\", \"芒果酸奶冰淇淋\", \"芒果酸奶布丁\"], \"notes\": \"这些甜品都只需酸奶和芒果，简单易做，适合快速享用。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 81,
+      "prompt_tokens": 138,
+      "total_tokens": 219,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 4069
+  },
+  "dishes": [
+    "芒果酸奶杯",
+    "芒果酸奶昔",
+    "芒果酸奶冻",
+    "芒果酸奶冰淇淋",
+    "芒果酸奶布丁"
+  ],
+  "matched": [
+    {
+      "name": "芒果酸奶杯",
+      "id": null
+    },
+    {
+      "name": "芒果酸奶昔",
+      "id": null
+    },
+    {
+      "name": "芒果酸奶冻",
+      "id": null
+    },
+    {
+      "name": "芒果酸奶冰淇淋",
+      "id": null
+    },
+    {
+      "name": "芒果酸奶布丁",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": []
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 0,
+  "feasible_rate": 0.0
+}

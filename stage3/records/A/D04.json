@@ -1,0 +1,72 @@
+{
+  "task_id": "D04",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "早餐想吃点简单的，有面粉和鸡蛋",
+  "raw_response": "{\"dishes\": [\"鸡蛋饼\", \"面糊摊饼\", \"蛋花面疙瘩汤\", \"葱花鸡蛋饼\", \"面粉鸡蛋羹\"], \"notes\": \"鸡蛋饼最简单，面糊摊饼可加葱花或盐调味，面疙瘩汤适合早餐暖胃。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 119,
+      "prompt_tokens": 140,
+      "total_tokens": 259,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 4430
+  },
+  "dishes": [
+    "鸡蛋饼",
+    "面糊摊饼",
+    "蛋花面疙瘩汤",
+    "葱花鸡蛋饼",
+    "面粉鸡蛋羹"
+  ],
+  "matched": [
+    {
+      "name": "鸡蛋饼",
+      "id": "早餐/蛋饼"
+    },
+    {
+      "name": "面糊摊饼",
+      "id": null
+    },
+    {
+      "name": "蛋花面疙瘩汤",
+      "id": null
+    },
+    {
+      "name": "葱花鸡蛋饼",
+      "id": "早餐/蛋饼"
+    },
+    {
+      "name": "面粉鸡蛋羹",
+      "id": "炒菜/鸡蛋羹"
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "早餐/蛋饼",
+        "name": "鸡蛋饼"
+      },
+      {
+        "id": "早餐/蛋饼",
+        "name": "葱花鸡蛋饼"
+      },
+      {
+        "id": "炒菜/鸡蛋羹",
+        "name": "面粉鸡蛋羹"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 1,
+  "items_total": 3,
+  "feasible_rate": 0.333
+}

@@ -1,0 +1,64 @@
+{
+  "task_id": "T05",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有面粉和猪肉馅，想包点东西当早餐",
+  "raw_response": "{\"dishes\": [\"猪肉大葱包子\", \"猪肉白菜饺子\", \"猪肉馅饼\", \"猪肉馄饨\", \"猪肉锅贴\"], \"notes\": \"面粉和猪肉馅可做多种早餐，包子、饺子最经典，馅饼和锅贴更快捷，馄饨需额外准备皮。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 116,
+      "prompt_tokens": 143,
+      "total_tokens": 259,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 4723
+  },
+  "dishes": [
+    "猪肉大葱包子",
+    "猪肉白菜饺子",
+    "猪肉馅饼",
+    "猪肉馄饨",
+    "猪肉锅贴"
+  ],
+  "matched": [
+    {
+      "name": "猪肉大葱包子",
+      "id": "早餐/包子"
+    },
+    {
+      "name": "猪肉白菜饺子",
+      "id": null
+    },
+    {
+      "name": "猪肉馅饼",
+      "id": null
+    },
+    {
+      "name": "猪肉馄饨",
+      "id": null
+    },
+    {
+      "name": "猪肉锅贴",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "早餐/包子",
+        "name": "猪肉大葱包子"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 1,
+  "feasible_rate": 0.0
+}

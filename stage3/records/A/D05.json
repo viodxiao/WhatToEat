@@ -1,0 +1,72 @@
+{
+  "task_id": "D05",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "我有五花肉，但是没有豆瓣酱",
+  "raw_response": "{\"dishes\": [\"红烧肉\", \"回锅肉（用甜面酱代替豆瓣酱）\", \"五花肉炒青椒\", \"梅菜扣肉\", \"蒜泥白肉\"], \"notes\": \"回锅肉可用甜面酱或生抽调味；梅菜扣肉需提前泡发梅菜。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 105,
+      "prompt_tokens": 138,
+      "total_tokens": 243,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 3073
+  },
+  "dishes": [
+    "红烧肉",
+    "回锅肉（用甜面酱代替豆瓣酱）",
+    "五花肉炒青椒",
+    "梅菜扣肉",
+    "蒜泥白肉"
+  ],
+  "matched": [
+    {
+      "name": "红烧肉",
+      "id": "炖菜/徽派红烧肉"
+    },
+    {
+      "name": "回锅肉（用甜面酱代替豆瓣酱）",
+      "id": "炒菜/回锅肉"
+    },
+    {
+      "name": "五花肉炒青椒",
+      "id": null
+    },
+    {
+      "name": "梅菜扣肉",
+      "id": "炒菜/梅菜扣肉"
+    },
+    {
+      "name": "蒜泥白肉",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "炖菜/徽派红烧肉",
+        "name": "红烧肉"
+      },
+      {
+        "id": "炒菜/回锅肉",
+        "name": "回锅肉（用甜面酱代替豆瓣酱）"
+      },
+      {
+        "id": "炒菜/梅菜扣肉",
+        "name": "梅菜扣肉"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 3,
+  "feasible_rate": 0.0
+}

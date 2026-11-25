@@ -1,0 +1,59 @@
+{
+  "task_id": "T03",
+  "split": "test",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有牛肉和洋葱，想炖着吃，别太难",
+  "raw_response": "{\"dishes\": [\"洋葱炖牛肉\", \"牛肉炖土豆\", \"西红柿炖牛腩\", \"洋葱胡萝卜炖牛肉\"], \"notes\": \"都是简单家常做法，牛肉切块焯水后与洋葱等一起炖，调味以酱油、盐、八角为主。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 87,
+      "prompt_tokens": 143,
+      "total_tokens": 230,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 3961
+  },
+  "dishes": [
+    "洋葱炖牛肉",
+    "牛肉炖土豆",
+    "西红柿炖牛腩",
+    "洋葱胡萝卜炖牛肉"
+  ],
+  "matched": [
+    {
+      "name": "洋葱炖牛肉",
+      "id": null
+    },
+    {
+      "name": "牛肉炖土豆",
+      "id": null
+    },
+    {
+      "name": "西红柿炖牛腩",
+      "id": null
+    },
+    {
+      "name": "洋葱胡萝卜炖牛肉",
+      "id": "炖菜/胡萝卜炖牛肉"
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "炖菜/胡萝卜炖牛肉",
+        "name": "洋葱胡萝卜炖牛肉"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 0,
+  "items_total": 1,
+  "feasible_rate": 0.0
+}

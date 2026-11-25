@@ -8,6 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23285542'/%3E%3Cpath d='M24 8c-10 0-16 4-16 10a5 5 0 0 0 5 5c6 0 11-6 11-15ZM7 25l11-11' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/assets/styles.css">
   <script type="module" src="/assets/app.js"></script>
+  <script type="module" src="/assets/natural-language.js"></script>
 </head>
 <body>
   <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -53,6 +54,16 @@
 
     <div class="workspace">
       <div class="main-column">
+        <section class="panel" style="padding:24px" aria-labelledby="nl-title">
+          <h2 id="nl-title">描述你想做的菜</h2>
+          <form id="nl-form">
+            <label for="nl-text">已有食材、缺少的佐料或厨具，以及难度要求</label>
+            <textarea id="nl-text" name="text" required maxlength="2000" rows="3" style="width:100%" placeholder="我有番茄和鸡蛋，没有生抽，想做简单一点的"></textarea>
+            <label><input type="checkbox" name="ontology" checked> 使用菜谱本体辅助理解</label>
+            <button type="submit">搜索菜谱</button>
+          </form>
+          <div id="nl-output" role="status" aria-live="polite"></div>
+        </section>
         <section class="panel pantry" aria-labelledby="pantry-title">
           <header class="panel-head">
             <div class="panel-heading"><span class="panel-icon"><svg class="icon"><use href="#i-leaf"/></svg></span><h2 id="pantry-title">我的厨房</h2></div>

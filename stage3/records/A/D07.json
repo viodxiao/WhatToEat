@@ -1,0 +1,68 @@
+{
+  "task_id": "D07",
+  "split": "dev",
+  "arm": "A",
+  "system_prompt": "# 角色\n\n你是一位家常菜助手。用户会说出自己手上的食材和限制条件，你要直接推荐几道**现在就做得出来**的菜。\n\n# 要求\n\n- 直接给菜名，用中文家常叫法，不用解释做法。\n- 给 3–5 道，按你认为的合适程度排序。\n- 只输出 JSON，不要任何解释文字：\n\n```json\n{\"dishes\": [\"菜名1\", \"菜名2\"], \"notes\": \"\"}\n```\n",
+  "user": "有鸡胸肉和西兰花，想做个简单的炒菜",
+  "raw_response": "{\"dishes\": [\"西兰花炒鸡胸肉\", \"鸡胸肉炒西兰花\", \"蒜蓉西兰花炒鸡丁\", \"蚝油鸡片西兰花\", \"黑椒鸡胸炒西兰花\"], \"notes\": \"都是简单快手的家常炒菜，适合现有食材。\"}",
+  "meta": {
+    "base_url": "https://myai.bupt.edu.cn/llm-gw/v1",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.0,
+    "usage": {
+      "completion_tokens": 94,
+      "prompt_tokens": 144,
+      "total_tokens": 238,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "elapsed_ms": 2783
+  },
+  "dishes": [
+    "西兰花炒鸡胸肉",
+    "鸡胸肉炒西兰花",
+    "蒜蓉西兰花炒鸡丁",
+    "蚝油鸡片西兰花",
+    "黑椒鸡胸炒西兰花"
+  ],
+  "matched": [
+    {
+      "name": "西兰花炒鸡胸肉",
+      "id": "炒菜/西兰花炒鸡胸肉"
+    },
+    {
+      "name": "鸡胸肉炒西兰花",
+      "id": null
+    },
+    {
+      "name": "蒜蓉西兰花炒鸡丁",
+      "id": "炒菜/蒜蓉西兰花"
+    },
+    {
+      "name": "蚝油鸡片西兰花",
+      "id": null
+    },
+    {
+      "name": "黑椒鸡胸炒西兰花",
+      "id": null
+    }
+  ],
+  "result": {
+    "mode": "direct",
+    "items": [
+      {
+        "id": "炒菜/西兰花炒鸡胸肉",
+        "name": "西兰花炒鸡胸肉"
+      },
+      {
+        "id": "炒菜/蒜蓉西兰花",
+        "name": "蒜蓉西兰花炒鸡丁"
+      }
+    ]
+  },
+  "params_score": null,
+  "feasible": 1,
+  "items_total": 2,
+  "feasible_rate": 0.5
+}
