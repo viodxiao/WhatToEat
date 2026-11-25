@@ -10,11 +10,11 @@
 
 ```powershell
 conda create -n cook python=3.13 -y
-conda run -n cook python -s -m pip install fastapi==0.165.0 uvicorn==0.54.0 pydantic==2.14.4
+conda run -n cook python -s -m pip install -r requirements.txt
 conda run -n cook --no-capture-output python -s -m uvicorn scripts.main:app --host 127.0.0.1 --port 8000
 ```
 
-运行依赖只有 `fastapi`、`uvicorn`、`pydantic`，版本以上面锁定值为准（Python 3.13 已实测）。跑测试另需 `httpx==0.28.1`。
+运行依赖见 `requirements.txt`（`fastapi`、`uvicorn`、`pydantic`，Python 3.13 已实测）。跑测试另需 `httpx==0.28.1`。
 
 打开 [菜谱选择器](http://127.0.0.1:8000/) 或 [接口文档](http://127.0.0.1:8000/docs)。在启动服务的终端按 Ctrl+C 可停止。修改菜谱数据后重启服务以重新读取。
 
