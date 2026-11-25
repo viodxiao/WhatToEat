@@ -45,7 +45,13 @@ def config_path() -> Path | None:
     explicit = os.environ.get(CONFIG_PATH_ENV, "").strip()
     if explicit:
         candidate = Path(explicit).expanduser()
-        return candidate if candidate.is_file() else None
+        if candidate.is_absolute():
+            return candidate if candidate.is_file() else None
+        # 相对路径先按当前目录找，再按项目根找，避免换个工作目录就失效
+        for base in (Path.cwd(), PROJECT_ROOT):
+            if (base / candidate).is_file():
+                return base / candidate
+        return None
     candidate = PROJECT_ROOT / CONFIG_FILE_NAME
     return candidate if candidate.is_file() else None
 

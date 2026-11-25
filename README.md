@@ -56,13 +56,34 @@ python -m scripts.quality_check check --tag after   # 全量扫描，当前应�
 python -m scripts.quality_check eval                # 构造错误样例的对照评测
 ```
 
-自然语言层（阶段三）需要一个 OpenAI 兼容接口，配置在环境变量里，不写进仓库：
+自然语言层（阶段三）需要一个 OpenAI 兼容接口。两种配置方式，**同一字段两处都配时以环境变量为准**。
+
+方式一 · 本地配置文件（推荐，配一次长期有效）：
 
 ```powershell
-python -m scripts.stage3_eval --check-gold          # 先验证标注可用，不调模型
+Copy-Item llm.example.json llm.local.json   # 再填写 base_url / api_key / model
+python -m scripts.llm_client                # 检查配置是否被读到，密钥只显示首尾
+```
+
+`llm.local.json` 已被 `.gitignore` 忽略，不会进仓库；仓库里只保留 `llm.example.json` 模板。
+
+方式二 · 环境变量（临时覆盖，适合切换模型或跑 CI）：
+
+```powershell
 $env:WTE_LLM_BASE_URL = "https://your-gateway/v1"
 $env:WTE_LLM_API_KEY  = "sk-..."
 $env:WTE_LLM_MODEL    = "gpt-4o-mini"
+```
+
+`base_url`、`api_key`、`model` 必填；`temperature`（默认 0）、`timeout`（默认 75 秒）、`max_tokens`（默认 4000）可选，配置文件中用同名小写键。也可以用 `WTE_LLM_CONFIG` 指向别的配置文件路径。
+
+配好后自检并运行评测：
+
+```powershell
+python -m scripts.llm_client --ping                 # 发一次最小请求验证连通性
+python -m scripts.stage3_eval --check-gold          # 先验证标注可用，不调模型
 python -m scripts.stage3_eval                       # 20 任务 × 4 方案 = 80 次调用
 python -m scripts.stage3_eval --replay              # 用已录制记录复算
 ```
+
+未配置模型时页面仍能正常打开，调用自然语言入口（`POST /api/parse`）会返回 503 并提示缺少哪几项。
