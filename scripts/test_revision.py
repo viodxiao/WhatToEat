@@ -9,7 +9,7 @@ from .agent import parse_request
 from .main import app
 from .llm_client import extract_json
 from .nl_query import parse_params, ontology_view
-from .planner import Planner
+from .planner import Check, Planner
 from .recipe_data import load_catalog
 
 
@@ -75,7 +75,8 @@ class RevisionTest(unittest.TestCase):
         gold['difficulties'] = [n for n in range(1, 6) if n != dish.difficulty]
         gold['categories'] = ['不存在分类']
         record = {'result': {'items': [{'id': dish.id}]}}
-        with patch.object(self.planner, 'best_method', return_value=([], ([], [], 0, 0, 0, 0))):
+        with patch.object(self.planner, 'best_method',
+                          return_value=([], Check([], [], [], 0, 0, 0, 0))):
             evaluation.annotate_feasibility({'X': {'C': record}}, self.planner, [{'id': 'X', 'gold': gold}])
         self.assertEqual(record['feasible'], 0)
 

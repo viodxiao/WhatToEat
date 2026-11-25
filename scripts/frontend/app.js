@@ -20,8 +20,8 @@ const storageKey = "recipe-planner:kitchen:v1";
 let recommendations = [];
 let nameMatches = [];
 let nameLimit = 14;
-let resultData = { ready: [], related: [] };
-let resultLimits = { ready: 14, related: 14 };
+let resultData = { ready: [], related: [], tools: [] };
+let resultLimits = { ready: 14, related: 14, tools: 14 };
 let openedRecipe;
 let searchController;
 let recipeSearchTimer;
@@ -262,7 +262,7 @@ function recipeDetailsButton(recipe) {
 }
 
 function recipeCard(recipe, excluded = null) {
-  const { missing = [] } = recipe;
+  const { missing = [], missing_tools: missingTools = [] } = recipe;
   const card = element("article", "recipe-card");
   const top = element("div", "card-top");
   const title = button(recipe.name, "card-title", () => showDetails(recipe.id));
@@ -275,7 +275,8 @@ function recipeCard(recipe, excluded = null) {
   top.append(title, actions);
   const meta = element("p", "card-meta");
   meta.append(element("span", "", recipe.category), element("span", "", stars(recipe.difficulty)));
-  if (missing.length) meta.append(element("span", "", `缺 ${missing.length} 项食材`));
+  if (missing.length) meta.append(element("span", "", `缺 ${missing.length} 项`));
+  if (missingTools.length) meta.append(element("span", "", "缺厨具"));
   const preview = element("div", "card-preview");
   for (const kind of kinds) {
     const line = element("div", "preview-line");
@@ -292,6 +293,7 @@ function recipeCard(recipe, excluded = null) {
     preview.append(line);
   }
   if (missing.length) preview.append(element("p", "missing", `还缺 ${missing.join("、")}`));
+  if (missingTools.length) preview.append(element("p", "missing missing-tool", `还缺厨具 ${missingTools.join("、")}`));
   card.append(top, meta, preview);
   return card;
 }
@@ -337,13 +339,14 @@ function renderResults() {
     }
     return;
   }
-  const { ready, related } = resultData;
+  const { ready, related, tools } = resultData;
   status.textContent = `${ready.length} 道可做`;
-  if (!ready.length && !related.length) {
+  if (!ready.length && !related.length && !tools.length) {
     output.append(element("p", "results-empty", "没有符合当前条件的菜谱。"));
     return;
   }
-  for (const [key, name] of [["ready", "食材已齐"], ["related", "还缺食材"]]) {
+  // 缺厨具单独一组放在最后：同时缺食材和厨具的菜由后端归到这里
+  for (const [key, name] of [["ready", "食材已齐"], ["related", "缺食材或佐料"], ["tools", "缺少厨具"]]) {
     const recipes = resultData[key];
     if (!recipes.length) continue;
     const group = element("section", `result-group ${key}`);
@@ -373,7 +376,9 @@ async function refreshResults(rotate = false) {
   const status = $("#result-count");
   const output = $("#results");
   status.textContent = query ? "正在搜索…" : recommend ? "正在推荐…" : "正在匹配…";
-  if (!rotate) output.replaceChildren();
+  // 不在请求前清空列表：先清空会让页面高度瞬间塌陷再撑开，看起来就是闪一下。
+  // 改成保留旧结果并整体降低不透明度，等新数据到了由 renderResults 一次性替换。
+  if (output.childElementCount) output.dataset.busy = "true";
   try {
     const filters = {
       difficulties: [...difficulties],
@@ -404,7 +409,7 @@ async function refreshResults(rotate = false) {
       recommendations = results;
     } else {
       resultData = results;
-      resultLimits = { ready: 14, related: 14 };
+      resultLimits = { ready: 14, related: 14, tools: 14 };
     }
     renderResults();
   } catch (error) {
@@ -418,7 +423,10 @@ async function refreshResults(rotate = false) {
       }
     }
   } finally {
-    if (!controller.signal.aborted) refreshButton.disabled = false;
+    if (!controller.signal.aborted) {
+      refreshButton.disabled = false;
+      delete output.dataset.busy;
+    }
   }
 }
 

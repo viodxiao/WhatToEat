@@ -30,9 +30,10 @@ class PlannerTests(unittest.TestCase):
         ]]
         selected = {"猪里脊", "土豆"}
         covered = expand(selected, self.planner.rules)
-        missing, blocked, *_ = self.planner.check(requirements, selected, covered, {"tool": {"烤箱"}, "seasoning": set()})
-        self.assertEqual(missing, [])
-        self.assertEqual(blocked, ["烤箱"])
+        check = self.planner.check(requirements, selected, covered, {"tool": {"烤箱"}, "seasoning": set()})
+        self.assertEqual(check.missing, [])
+        self.assertEqual(check.supplies, [])
+        self.assertEqual(check.blocked, ["烤箱"])
 
     def test_required_ingredients_and_missing_supplies(self):
         curry = "炒菜/咖喱肥牛"
@@ -45,22 +46,50 @@ class PlannerTests(unittest.TestCase):
             self.assertEqual(curry in {recipe["id"] for recipe in results["ready"]}, expected)
 
     def test_only_missing_supplies_still_lists_compatible_dishes(self):
-        for seasonings, tools, blocked in [
-            (["咖喱块"], [], "炒菜/咖喱肥牛"),
-            ([], ["烤箱"], "烤类/烤茄子"),
-        ]:
-            with self.subTest(blocked=blocked):
-                results = self.planner.search([], seasonings, tools, range(1, 6), [])
-                ids = {recipe["id"] for recipe in results["ready"]}
-                self.assertIn("炒菜/西红柿炒鸡蛋", ids)
-                self.assertNotIn(blocked, ids)
-                self.assertFalse(any(recipe["missing"] for recipe in results["ready"]))
-                self.assertEqual(results["related"], [])
-                if tools:
-                    self.assertIn("烤类/烤鱼", ids)
+        eggs = "炒菜/西红柿炒鸡蛋"
+        # 只声明缺佐料：不能当作「已齐」，但也只是降级到「缺食材或佐料」，不再整道剔除
+        results = self.planner.search([], ["咖喱块"], [], range(1, 6), [])
+        ready = {recipe["id"] for recipe in results["ready"]}
+        self.assertIn(eggs, ready)
+        self.assertNotIn("炒菜/咖喱肥牛", ready)
+        self.assertFalse(any(recipe["missing"] for recipe in results["ready"]))
+        curry = next(r for r in results["related"] if r["id"] == "炒菜/咖喱肥牛")
+        self.assertEqual(curry["missing"], ["咖喱块"])
+        self.assertEqual(curry["missing_tools"], [])
+        self.assertEqual(results["tools"], [])
+
+        # 只声明缺厨具：进「缺少厨具」一组，不是「缺食材或佐料」
+        results = self.planner.search([], [], ["烤箱"], range(1, 6), [])
+        ready = {recipe["id"] for recipe in results["ready"]}
+        self.assertIn(eggs, ready)
+        self.assertIn("烤类/烤鱼", ready)
+        self.assertNotIn("烤类/烤茄子", ready)
+        self.assertEqual(results["related"], [])
+        oven = next(r for r in results["tools"] if r["id"] == "烤类/烤茄子")
+        self.assertEqual(oven["missing_tools"], ["烤箱"])
+        self.assertEqual(oven["missing"], [])
+
         for tools, expected in [(["微波炉"], True), (["平底锅", "微波炉"], False)]:
             results = self.planner.search([], [], tools, [1], [])
             self.assertEqual(any(recipe["id"] == "主食/半成品意面" for recipe in results["ready"]), expected)
+
+    def test_missing_tool_takes_priority_over_missing_ingredients(self):
+        # 同时缺食材和缺厨具时，归到「缺少厨具」，不出现在「缺食材或佐料」
+        results = self.planner.search(["排骨"], [], ["砂锅"], range(1, 6), [])
+        buckets = {key: {recipe["id"] for recipe in results[key]} for key in ("ready", "related", "tools")}
+        # 只写砂锅的菜：缺厨具
+        for recipe_id in ("汤/玉米排骨汤", "汤/排骨苦瓜汤"):
+            self.assertIn(recipe_id, buckets["tools"])
+            self.assertNotIn(recipe_id, buckets["related"])
+            self.assertNotIn(recipe_id, buckets["ready"])
+        # 砂锅 / 深汤锅 二选一的菜：深汤锅没被排除，仍然算能做
+        self.assertIn("汤/排骨山药玉米汤", buckets["related"])
+        # 缺厨具这一组里，确有同时缺食材的菜，说明优先级生效
+        both = [r for r in results["tools"] if r["missing"]]
+        self.assertTrue(both)
+        self.assertTrue(all(r["missing_tools"] for r in results["tools"]))
+        self.assertFalse(any(r["missing_tools"] for r in results["related"]))
+        self.assertFalse(any(r["missing"] or r["missing_tools"] for r in results["ready"]))
 
     def test_category_filter_combines_with_difficulty_and_pantry(self):
         categories = ["炒菜", "汤"]

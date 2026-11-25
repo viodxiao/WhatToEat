@@ -1,12 +1,29 @@
 from collections import Counter
 from dataclasses import asdict
 from random import sample
+from typing import NamedTuple
 from unicodedata import normalize
 
 from .recipe_data import ALIASES, AVAILABILITY_STOP, KINDS, PARENTHESES, canonical, expand, kind_of
 
 
 LABELS = {"ingredient": "食材", "seasoning": "佐料", "tool": "厨具"}
+
+
+class Check(NamedTuple):
+    """一次需求组检查的结果。
+
+    三类缺口分开记，因为页面上要分两组展示，且「缺厨具」优先级最高：
+    一道菜同时缺食材和厨具时，它归到「缺少厨具」，而不是「缺食材或佐料」。
+    """
+
+    missing: list          # 缺食材（每个元素是一组替代项，用 / 连接）
+    supplies: list         # 缺佐料
+    blocked: list          # 缺厨具
+    direct: int            # 直接命中的需求组数
+    matched: int           # 经规则扩展后命中的需求组数
+    available_supplies: int
+    ingredient_groups: int
 
 
 def all_groups(recipe):
@@ -87,6 +104,7 @@ class Planner:
 
     def check(self, requirements, selected, covered, excluded):
         missing = []
+        supplies = []
         blocked = []
         direct = 0
         matched = 0
@@ -108,15 +126,20 @@ class Planner:
             names = " / ".join(item.name for item in options)
             if any(item.kind == "ingredient" for item in options):
                 missing.append(names)
+            elif any(item.kind == "seasoning" for item in options):
+                supplies.append(names)
             else:
                 blocked.append(names)
-        return missing, blocked, direct, matched, available_supplies, ingredient_groups
+        return Check(missing, supplies, blocked, direct, matched, available_supplies, ingredient_groups)
 
     def best_method(self, recipe, selected, covered, excluded):
         methods = recipe.variants or (recipe.requirements,)
         candidates = [(method, self.check(method, selected, covered, excluded)) for method in methods]
         return max(candidates, key=lambda candidate: (
-            not candidate[1][1], -len(candidate[1][0]), candidate[1][2], candidate[1][3]
+            not candidate[1].blocked,
+            -(len(candidate[1].missing) + len(candidate[1].supplies)),
+            candidate[1].direct,
+            candidate[1].matched,
         ))
 
     def dishes_for_filters(self, levels, categories):
@@ -130,8 +153,13 @@ class Planner:
         candidates = self.dishes_for_filters(levels, allowed)
         if any(excluded.values()):
             empty_pantry = set()
-            candidates = (recipe for recipe in candidates
-                          if not self.best_method(recipe, empty_pantry, empty_pantry, excluded)[1][1])
+
+            def usable(recipe):
+                # 推荐不列「明确缺的佐料/厨具」做不了的菜；缺食材不算，因为此时没声明手头有什么
+                check = self.best_method(recipe, empty_pantry, empty_pantry, excluded)[1]
+                return not check.blocked and not check.supplies
+
+            candidates = (recipe for recipe in candidates if usable(recipe))
         previous = set(previous_ids)
         matches = [recipe.id for recipe in candidates]
         fresh = [recipe_id for recipe_id in matches if recipe_id not in previous]
@@ -160,27 +188,40 @@ class Planner:
         levels = set(difficulties)
         allowed = None if categories is None else set(categories)
         if not selected and not any(excluded.values()) and levels == set(range(1, 6)) and allowed is None:
-            return {"ready": [], "related": []}
-        ready, related = [], []
+            return {"ready": [], "related": [], "tools": []}
+        ready, related, tool_bound = [], [], []
         for recipe in self.dishes_for_filters(levels, allowed):
-            _, (missing, blocked, direct, matched, supplies, groups) = self.best_method(recipe, selected, covered, excluded)
-            if blocked:
-                continue
+            _, check = self.best_method(recipe, selected, covered, excluded)
+            item = {**self.lookup[recipe.id],
+                    "missing": [*check.missing, *check.supplies],
+                    "missing_tools": check.blocked}
             if not selected:
-                # Ingredient availability is unspecified when browsing by other filters.
-                ready.append(((-recipe.difficulty,), {**self.lookup[recipe.id], "missing": []}))
+                # 没声明食材时只能浏览，食材缺口不作数；但声明的缺佐料/缺厨具是确定的
+                declared = {**item, "missing": check.supplies}
+                if check.blocked:
+                    tool_bound.append(((-recipe.difficulty,), declared))
+                elif check.supplies:
+                    related.append(((-recipe.difficulty,), declared))
+                else:
+                    ready.append(((-recipe.difficulty,), {**item, "missing": []}))
                 continue
             all_labels = set(self.lookup[recipe.id]["labels"]["ingredient"])
             linked = len((all_labels | self.related_terms[recipe.id]) & covered)
-            rank = (matched / max(1, groups), direct, matched, linked, supplies, -len(missing), -recipe.difficulty)
-            item = {**self.lookup[recipe.id], "missing": missing}
-            if not missing and (matched or linked):
-                ready.append((rank, item))
-            elif matched or linked:
+            if not (check.matched or linked):
+                continue
+            rank = (check.matched / max(1, check.ingredient_groups), check.direct, check.matched,
+                    linked, check.available_supplies, -len(check.missing), -recipe.difficulty)
+            # 缺厨具优先级最高：同时缺食材/佐料的菜也归到「缺少厨具」
+            if check.blocked:
+                tool_bound.append((rank, item))
+            elif check.missing or check.supplies:
                 related.append((rank, item))
+            else:
+                ready.append((rank, item))
         return {
             "ready": [item for _, item in sorted(ready, key=lambda row: row[0], reverse=True)],
             "related": [item for _, item in sorted(related, key=lambda row: row[0], reverse=True)],
+            "tools": [item for _, item in sorted(tool_bound, key=lambda row: row[0], reverse=True)],
         }
 
     def shopping(self, ids, ingredients, seasonings, tools, *, include_missing=False):

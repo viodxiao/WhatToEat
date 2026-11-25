@@ -30,12 +30,10 @@ body::before {
     radial-gradient(ellipse at 92% 72%, #dce6f8 0, transparent 53%),
     radial-gradient(ellipse at 62% 97%, #ebdef1 0, transparent 37%);
   background-size: 145% 145%;
-  animation: sunlight 24s ease-in-out infinite alternate;
-}
-@keyframes sunlight {
-  0%, 13% { background-position: 0% 34%; opacity: .65; }
-  58% { background-position: 78% 0%; opacity: .95; }
-  100% { background-position: 100% 85%; opacity: .72; }
+  /* 原来是 24s 无限循环的 sunlight 动画，在 background-position 和 opacity 之间来回跑，
+     整块视口背景一直在呼吸，看起来就是页面在闪。改成静态铺底，位置和透明度取动画中段。 */
+  background-position: 45% 35%;
+  opacity: .82;
 }
 button, input { font: inherit; }
 button { cursor: pointer; color: inherit; }
@@ -181,9 +179,12 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 #results { padding-inline: 23px; }
 .results-empty { padding: 13px 0 11px; font-size: 13px; color: var(--muted); }
 .recipe-hint { margin-bottom: 12px; }
+#results { transition: opacity .16s ease; }
+#results[data-busy="true"] { opacity: .5; }
 .result-group + .result-group { margin-top: 18px; }
 .result-group h3 { margin-bottom: 8px; font-size: 13px; color: var(--green); }
 .result-group.related h3 { color: #805239; }
+.result-group.tools h3 { color: #4d577b; }
 .result-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .recipe-card { position: relative; min-width: 0; border: 1px solid #e4ebe4; border-radius: 11px; background: #fafcf9; padding: 10px 10px 8px 12px; }
 .recipe-card:hover { border-color: #b1cab8; z-index: 3; }
@@ -201,6 +202,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .preview-line span { background: #f0f4ef; padding: 2px 5px; border-radius: 5px; font-size: 11px; }
 .preview-line span.label-missing { background: var(--red-tint); color: var(--red); text-decoration: line-through; }
 .missing { padding-top: 4px; color: #805239; }
+.missing.missing-tool { color: #4d577b; }
 .more { margin-top: 9px; }
 .plan { position: sticky; top: 14px; scroll-margin-top: 14px; }
 .count-badge { font-size: 12px; color: var(--green); background: var(--green-tint); border-radius: 999px; padding: 4px 8px; white-space: nowrap; }

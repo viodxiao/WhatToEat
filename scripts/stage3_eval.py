@@ -254,9 +254,8 @@ def annotate_feasibility(records: dict, planner, tasks: list) -> None:
                 recipe = planner.recipes.get(recipe_id)
                 if recipe is None:
                     continue
-                missing, blocked, *_ = planner.best_method(
-                    recipe, selected, covered, excluded)[1]
-                feasible += int(not missing and not blocked
+                check = planner.best_method(recipe, selected, covered, excluded)[1]
+                feasible += int(not (check.missing or check.supplies or check.blocked)
                                 and recipe.difficulty in gold["difficulties"]
                                 and (gold["categories"] is None or recipe.category in gold["categories"]))
             record["feasible"] = feasible

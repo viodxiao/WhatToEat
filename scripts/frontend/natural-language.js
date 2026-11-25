@@ -4,7 +4,7 @@ const output = document.querySelector('#nl-output');
 // 共享渲染器用动态导入：即使 app.js 加载失败，submit 处理器也已经挂上，
 // preventDefault 一定生效，不会退化成浏览器默认提交导致整页刷新。
 let shared = null;
-const limits = {ready: 6, related: 6};
+const limits = {ready: 6, related: 6, tools: 6};
 let last = null;
 
 async function renderer() {
@@ -42,8 +42,9 @@ async function draw(ui) {
   output.dataset.state = 'done';
   output.replaceChildren();
   output.append(element('p', 'nl-hint', parsed.assumptions.join('；')));
-  for (const [key, label] of [['ready', '符合条件的候选'], ['related', '仍缺食材的候选']]) {
-    const items = result[key];
+  for (const [key, label] of [['ready', '符合条件的候选'], ['related', '缺食材或佐料的候选'],
+                              ['tools', '缺少厨具的候选']]) {
+    const items = result[key] ?? [];
     if (!items.length) continue;
     const group = element('section', `result-group ${key}`);
     group.append(element('h3', '', `${label} · ${items.length}`));
@@ -53,7 +54,7 @@ async function draw(ui) {
     }, excluded);
     output.append(group);
   }
-  if (!result.ready.length && !result.related.length) {
+  if (!result.ready.length && !result.related.length && !(result.tools ?? []).length) {
     output.append(element('p', 'results-empty', '没有符合当前条件的菜谱。'));
   }
   const details = element('details', 'nl-conditions');
@@ -77,6 +78,7 @@ form?.addEventListener('submit', async event => {
     const result = await post('/api/search', parsed.search_payload);
     limits.ready = 6;
     limits.related = 6;
+    limits.tools = 6;
     last = {parsed, result};
     await draw(ui);
   } catch (error) { status('error', error.message); }

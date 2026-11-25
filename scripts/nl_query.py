@@ -285,13 +285,18 @@ def search(planner, params: dict) -> dict:
         [canonical(x) for x in params["seasonings"]],
         [canonical(x) for x in params["tools"]],
         params["difficulties"], params["preparation_ids"], categories=params["categories"])
-    ready = [{"id": item["id"], "name": item["name"], "missing": item["missing"]}
+    ready = [{"id": item["id"], "name": item["name"], "missing": item["missing"],
+              "missing_tools": item["missing_tools"]}
              for item in result["ready"]]
-    related = [{"id": item["id"], "name": item["name"], "missing": item["missing"]}
+    related = [{"id": item["id"], "name": item["name"], "missing": item["missing"],
+                "missing_tools": item["missing_tools"]}
                for item in result["related"]]
+    tools = [{"id": item["id"], "name": item["name"], "missing": item["missing"],
+              "missing_tools": item["missing_tools"]}
+             for item in result["tools"]]
     return {"mode": mode, "items": ready[:10], "ready_total": len(ready),
-            "related_total": len(related),
-            "related": related[:5]}
+            "related_total": len(related), "tools_total": len(tools),
+            "related": related[:5], "tools": tools[:5]}
 
 
 def run(planner, view: dict, text: str, client, *, strict: bool = True) -> dict:
