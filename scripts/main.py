@@ -8,6 +8,13 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+if __package__ in (None, ""):
+    # 直接运行 scripts/main.py（IDE 的 Run 按钮）时没有父包，相对导入会失败。
+    # 把仓库根加进 sys.path 并补上包名，使脚本方式与 `-m uvicorn` 方式都能启动。
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    __package__ = "scripts"
+
 from .llm_client import Client
 from .planner import Planner
 from .recipe_data import RECIPE_DIR, canonical, load_catalog
@@ -142,3 +149,9 @@ def parse_natural_language(body: NaturalLanguageRequest, request: Request):
         raise HTTPException(422, '模型返回的搜索参数不合法，请重新描述需求') from None
     except LLMError:
         raise HTTPException(502, '模型调用或响应解析失败，请检查服务配置') from None
+
+
+if __name__ == "__main__":
+    # 供直接运行本文件时启动服务；用 `-m uvicorn scripts.main:app` 启动时不会走到这里。
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

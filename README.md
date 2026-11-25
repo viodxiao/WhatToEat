@@ -16,6 +16,8 @@ conda run -n cook --no-capture-output python -s -m uvicorn scripts.main:app --ho
 
 运行依赖见 `requirements.txt`（`fastapi`、`uvicorn`、`pydantic`，Python 3.13 已实测）。跑测试另需 `httpx==0.28.1`。
 
+也可以在 IDE 里直接运行 `scripts/main.py`，或在仓库根目录执行 `python -m uvicorn scripts.main:app`，两种方式等价。
+
 打开 [菜谱选择器](http://127.0.0.1:8000/) 或 [接口文档](http://127.0.0.1:8000/docs)。在启动服务的终端按 Ctrl+C 可停止。修改菜谱数据后重启服务以重新读取。
 
 
