@@ -8,7 +8,7 @@ from pathlib import Path
 RECIPE_DIR = Path(__file__).resolve().parents[1] / "recipe"
 KINDS = ("ingredient", "seasoning", "tool")
 MATERIAL_HEADINGS = {"必备原料和工具", "原料", "配料", "已知成分", "厨具", "家用厨具", "材料", "工具"}
-OPTIONAL = re.compile(r"可选(?:项|配料|材料)?(?=[：:，,；;）)\s]|$)|可省略|可不放|可以不放|非必需|不加也|不放也")
+OPTIONAL = re.compile(r"可选(?:项|配料|材料)?(?=[：:，,；;）)\]\s但]|$)|可省略|可不放|可以不放|非必需|不加也|不放也")
 PARENTHESES = re.compile(r"[（(]([^（）()]*)[）)]")
 UNIT = r"(?:克|g|毫升|ml|千克|公斤|kg|斤|个|颗|瓣|勺|撮|节|片|根|段|袋|包|盒|块|只|条|杯|滴|小匙|大匙|茶匙|汤匙|枚|把|头|罐|瓶|升|L)"
 AMOUNT = re.compile(rf"(?<![\d.])\d+(?:\.\d+)?(?:\s*(?:[-–—~～至/])\s*\d+(?:\.\d+)?)*\s*{UNIT}(?![a-z])", re.I)
@@ -30,8 +30,70 @@ ALIASES = {
     "西红柿": "番茄", "马铃薯": "土豆", "牛腩肉": "牛腩", "香菇片": "香菇",
     "鸡汤料": "调味料（鸡汤专用）", "食用盐": "盐", "泡面": "方便面",
 }
-SEASONINGS = set("""
-盐 糖 白砂糖 红糖 冰糖 黑糖 蜂蜜 味精 鸡精 麻辣鲜 海皇汁 十三香 八角 桂皮 香叶
+
+# 阶段二修正：切配形态归一。原文用「整料 + 切配描述」表述（如「红椒丝」），
+# 拿到整料用刀即可处理，按同一实体对待，与表内已有的「土豆片→土豆」「葱段→葱」一致。
+# 需要绞、磨、泡发等额外工序或本身是独立商品的形态（末/粒/馅/泥/蓉/沫/碎/粉/浆）不在此列，
+# 依《原料标签单向匹配规则》[匹配约定] 第 6 条独立匹配。
+SHAPE_ALIASES = {
+    "五花肉块": "五花肉", "五花肉条": "五花肉", "五花肉片": "五花肉",
+    "南瓜丁": "南瓜", "南瓜块": "南瓜", "大油片丝": "大油片",
+    # 待复核：山楂片是干制品，用鲜山楂替代语义不严谨。保留归一的原因是
+    # 「山楂片」不在 CSV 标签与词表中，取消归一后用户勾「山楂」将无法匹配酸梅汤。
+    # 见 stage2/KNOWN_ISSUES.md 的 K6。
+    "山楂片": "山楂", "山药段": "山药", "巴沙鱼片": "巴沙鱼",
+    "干辣椒段": "干辣椒", "海带丝": "海带", "火腿片": "火腿",
+    "猪肉片": "猪肉", "玉米块": "玉米", "生姜片": "生姜",
+    "红椒丁": "红椒", "红椒丝": "红椒", "红薯块": "红薯",
+    "肥牛片": "肥牛", "胡萝卜丝": "胡萝卜", "胡萝卜片": "胡萝卜",
+    "芹菜段": "芹菜", "草鱼块": "草鱼", "面筋块": "面筋",
+    "鸡胗片": "鸡胗", "鸡胸肉片": "鸡胸肉", "黑鱼片": "黑鱼",
+}
+ALIASES.update(SHAPE_ALIASES)
+
+# 阶段二修正：抽取噪声与修饰语。
+# 见 stage2/问题清单_before.md 的 E1（误抽）与 E2（修饰语未剥离）。
+NOISE_NAME = re.compile(
+    r"可省略|可按|可以|也可|皆可|都可以|可备|可依据|可根据|可选|即可|参见|未过期|按需|自行|依个人"
+    r"|建议|如果|注意|需要|不用|不宜|如何|有点|但推荐|例如|一块$|是最好的|所需"
+    r"|如(?=[\u4e00-\u9fa5]{1,3}$)|等(?:豆制品|蛋类|蔬菜)类|等[^\s]{1,4}类$"
+)
+NOISE_PREFIX = re.compile(
+    r"^(?:一个装成品的|一口有点深度的|一口|一个鸡蛋的|普通的|大号的|小而深的|深一点的|有一定深度的"
+    r"|放得下[^\s]{0,6}的|例如带刻度的|额外的|喜欢的|其余配菜例如|切块的|打碎的|泡发好的|泡好的"
+    r"|煮熟的|熟透的|稍微肥一点的|选用切好的|未过期的|任何牌子的|李大厨牌子的|炒熟的|热干面特有的"
+    r"|分可控火候|不可控火候)"
+)
+
+
+def strip_modifier(name):
+    """剥掉「未过期的」「切块的」「普通的」这类修饰前缀，留下可购买的整料名。
+
+    只处理明确列出的修饰前缀，不做通用的「取『的』后面部分」，
+    否则「带煮浆功能的豆浆机」会被错误截成「豆浆机」，丢失设备能力信息。
+    """
+    prefix = NOISE_PREFIX.match(name)
+    if prefix:
+        name = name[prefix.end():]
+        if "的" in name:
+            tail = name.rsplit("的", 1)[-1]
+            if len(tail) >= 2:
+                name = tail
+    return name.strip(" 　:：,，、-—")
+
+
+def is_noise_name(name, vocabulary=frozenset()):
+    """判断一个名称是不是「不是原料」的噪声：提示语、语气词、类目名或过长描述。"""
+    if not name or name in vocabulary:
+        return False
+    if re.search(r"[a-zA-Z]", name):
+        return False
+    if NOISE_NAME.search(name) or NOISE_PREFIX.match(name):
+        return True
+    return len(name) > 10
+
+
+SEASONINGS = set("""盐 糖 白砂糖 红糖 冰糖 黑糖 蜂蜜 味精 鸡精 麻辣鲜 海皇汁 十三香 八角 桂皮 香叶
 孜然 小茴香 丁香 草果 草豆蔻 草寇 山奈 陈皮 白芷 香辛料 调味料 料酒 米酒 黄酒
 啤酒 老抽 生抽 酱油 蒸鱼豉油 豉油 豆豉 鱼露 蚝油 醋 白醋 陈醋 香醋 米醋
 黑胡椒 白胡椒 胡椒 花椒 藤椒 麻椒 咖喱块 咖喱粉 火锅底料 水 清水 泡打粉
@@ -191,7 +253,10 @@ def requirement_parts(fragment, vocabulary, preparations, tools):
         name = clean_name(option, vocabulary)
         if not name or name in {"…", "……", "...", "/", "等", "适量"}:
             continue
-        if name not in vocabulary and (len(name) > 14 or re.search(r"[。！？]|^(?:注意|请|如果|可以|建议|根据|按照|尽量|步骤|配料|者)", name)):
+        name = canonical(strip_modifier(name))
+        if not name or is_noise_name(name, vocabulary):
+            continue
+        if name not in vocabulary and re.search(r"[。！？]", name):
             continue
         items.setdefault(name, Material(name, kind_of(name, preparations, tools), grams_for(option)))
     return Requirement(tuple(items.values()), optional)
